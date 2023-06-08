@@ -1,1 +1,2 @@
-# Dev-Docs
+# Important Documentation and Code
+This repo is a comprehensive documentation repository that covers various concepts, common errors, and code samples related to Git, HTML, CSS, Next.js, and other technologies. It serves as a helpful resource for developers to quickly find information and solutions related to these topics.
