@@ -111,8 +111,11 @@ or
 ```
 * To understand better go to PasswordPage.jsx file and see useEffect hook and .main-container.
 
-### justify content not working:
+### justify-content not working:
 * position is set to absolute, remove position and instead use padding or margin.
 
 ### Horizontal scrolling in website
 - Its due to either different sizes of navbar and content or due to styling in body tag in css or related file, do changes in that.
+
+### Issue with cards height
+- Try to fix height of cards for different breakpoints.
