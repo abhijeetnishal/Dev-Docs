@@ -82,4 +82,8 @@
 - visit: https://www.labnol.org/google-api-service-account-220405
 - For google api visit: https://console.cloud.google.com/projectselector2/apis/library/gmail.googleapis.com?supportedpurview=project&authuser=1
 
+### Sending Email using AWS SES
+- visit:
+    - https://www.freecodecamp.org/news/set-up-aws-simple-email-service/
+    - https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/ses-examples-sending-email.html
 

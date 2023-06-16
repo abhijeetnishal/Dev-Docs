@@ -63,5 +63,8 @@ Some of the utility classes:
     <div className='w-full px-[440px] sm:px-[100px] md:px-[140px] lg:px-[300px] xl:px-[420px] 2xl:px-[560px]'>
     ```
 
+### calc in tailwind
+- h-[calc(100vh-50px)]
+
 ### Reference:
  https://www.freecodecamp.org/news/what-is-tailwind-css-a-beginners-guide/

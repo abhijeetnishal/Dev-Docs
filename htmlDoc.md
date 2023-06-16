@@ -4,3 +4,5 @@
    <meta name="viewport" content="width=device-width">
     ```
     
+### Semantic HTML
+- visit: https://www.semrush.com/blog/semantic-html5-guide/
