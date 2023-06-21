@@ -53,6 +53,9 @@
 - visit to understand more: https://nextjs.org/learn/foundations/how-nextjs-works/rendering
 - With server-side rendering, the HTML of the page is generated on a server for each request. The generated HTML, JSON data, and JavaScript instructions to make the page interactive are then sent to the client.
 - On the client, the HTML is used to show a fast non-interactive page, while React uses the JSON data and JavaScript instructions to make components interactive (for example, attaching event handlers to a button). This process is called hydration.
+- With Static Site Generation, the HTML is generated on the server, but unlike server-side rendering, there is no server at runtime. Instead, content is generated once, at build time, when the application is deployed, and the HTML is stored in a CDN and re-used for each request.
+- 
 
 ### References
 - https://nextjs.org/learn/foundations/about-nextjs
+

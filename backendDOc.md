@@ -2,9 +2,6 @@
 -  In REST API route naming conventions, it is generally recommended to use nouns to represent resources and verbs to represent actions on those resources.
 - However, there can be exceptions when using verbs as part of a compound term to convey a specific action or operation. In the case of "send-code," it can be considered acceptable if it represents the action of sending a verification code or password reset code via email or other means.
 
-### OAuth 1.0 and OAuth 2.0
-- visit this site to understand easily: https://medium.com/identity-beyond-borders/oauth-1-0-vs-oauth-2-0-e36f8924a835#:~:text=OAuth%201.0%20needs%20to%20generate,SSL%20(HTTPS)%20for%20communication. 
-
 ### Access Token and Refresh Token in oAuth2.0:
 - Generated during login route and userId will be used as a payload of jwt.
 - We can use access token for short time while refresh token for longer time.
@@ -53,11 +50,13 @@
 ```
 - Clear all related cookies during logout to remove all data.
 
-
+### Get Secret key
+- https://randomkeygen.com/
 
 ### httpOnly in server
 - The "HttpOnly" attribute is a flag that can be set when creating a cookie in web applications. When this attribute is set, it instructs the web browser that the cookie should not be accessible through client-side scripting languages such as JavaScript.
 - By setting the HttpOnly flag, the cookie becomes restricted to being transmitted only via HTTP or HTTPS requests, preventing access from other methods like JavaScript's Document.cookie property. This helps protect against cross-site scripting (XSS) attacks, where an attacker tries to inject malicious scripts into a website to steal sensitive information, such as session cookies.
+- visit this to understand better: https://javascript.plainenglish.io/next-js-secure-authentication-using-http-only-cookie-graphql-or-rest-a4ef94cec9e8
 
 ### Reset password(my-approach)
 1. First verify the email i.e. account registered or not.
@@ -87,3 +86,12 @@
     - https://www.freecodecamp.org/news/set-up-aws-simple-email-service/
     - https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/ses-examples-sending-email.html
 
+### Create a google credentials(client_id and client_secret)
+- First go to https://console.cloud.google.com/projectcreate?previousPage=%2Fapis%2Fcredentials%3Fcloudshell%3Dtrue%26project%3Ddouble-genius-390404&organizationId=0&cloudshell=true to create a project if not created.
+- Enter project name and organisation and click on create.
+- Click on APIs & Services from side navbar.
+- Now enable gmail API by clicking on Enable APIs & services and click on +ENABLEAPI, it will open all google apps, then select Gmail API and click enable.
+- In API & Services, click on Credentials and then click on + CREATE CREDENTIALS and select OAuth client ID and create a Oauth Client ID.
+- Enter necessary details.
+- Select application type and enter Authorized JavaScript origins, Authorized redirect URIs.
+- Click on create, after creating it will give Client ID and Client Secret, add to .env file

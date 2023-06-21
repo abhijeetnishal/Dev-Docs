@@ -119,3 +119,21 @@ or
 
 ### Issue with cards height
 - Try to fix height of cards for different breakpoints.
+
+### How to add different components to different screens
+- Using display property of css we can do.
+- Using Tailwind css:
+  ```css
+  <div className='flex xl:flex lg:flex md:flex sm:flex xs:hidden'>
+  /*
+  content will visible for all screen breakpoint except xs(see tailwind.config.js)
+  */
+  </div>
+
+  <div className='flex xl:hidden lg:hidden md:hidden sm:hidden xs:flex'>
+  /*
+  content will be hidden for all screen breakpoint except xs(see tailwind.config.js)
+  */
+  </div>
+  ```
+- Logic is basicaly which all breakpoints component is hidden and which all breakpoints component is visible(using display: flex)
