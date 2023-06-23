@@ -80,6 +80,7 @@ export async function POST() {
 ```
 
 ### Google Login in NextJs
+- Visit this site to understand some methods of nextAuth.js: https://codevoweb.com/setup-and-use-nextauth-in-nextjs-13-app-directory/?ez_vid=qYWsIiWrPiu#ezoic-pub-video-placeholder-107
 - Install next-auth using command: 
   ```ts  
   npm i next-auth
@@ -115,79 +116,217 @@ export async function POST() {
   export { handler as GET, handler as POST };
   ````
 -  After that create a frontend for login-page with google:
-```ts
-import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+  ```ts
+  import { useRouter, useSearchParams } from 'next/navigation';
+  import { signIn } from 'next-auth/react';
 
-const page = () => {
+  const page = () => {
 
-const searchParams = useSearchParams();
-const callbackUrl = searchParams.get("callbackUrl") || "/auth/user";
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/auth";
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await signIn("google", {
-        redirect: false,
-        email: email,
-        password: password,
-        callbackUrl,
-      });
-
-      console.log(res);
-      if (!res?.error) {
-        router.push(callbackUrl);
+    const onSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+        await signIn("google", {
+          redirect: false,
+          email: email,
+          password: password,
+          callbackUrl,
+        });
+      } 
+      catch (error) {
+          console.log(error)
       }
-    } catch (error) {
-        console.log(error)
-    }
-  };
+    };
 
-  return (
-    <main className='flex flex-col justify-center items-center h-[calc(100vh-20px-40px)]'>
-        <header className='font-bold'>
-            Login
-        </header>
-        <section className='pt-[20px]'>
-            <button onClick={ onSubmit } className='w-[150px] border-2 rounded-md bg-blue-400'>Google Login</button>
-        </section>
-    </main>
-  )
-}
-```
+    return (
+      <main className='flex flex-col justify-center items-center h-[calc(100vh-20px-40px)]'>
+          <header className='font-bold'>
+              Login
+          </header>
+          <section className='pt-[20px]'>
+              <button onClick={ onSubmit } className='w-[150px] border-2 rounded-md bg-blue-400'>Google Login</button>
+          </section>
+      </main>
+    )
+  }
+  ```
 
-- Add below code in layout.tsx:
-```tsx
-'use client'
+- Create a backend for checking user is registered or not(using email) with route: /api/auth/google/is-registered. Get email address using server session of nextauth.js
+  ```ts
+  //get session data in api route(server)
+  const session = await getServerSession(authOptions);
 
-<body className={inter.className}>
-  <SessionProvider>
-    <Header />
-      {children}
-    <Footer />
-  </SessionProvider>
-</body>
-```
+  //get email through session
+  const email = session?.user?.email;
+  ```
+
+- create a redirection page where we check the user is registered with google or not.
+- Make that page hidden to not show that page and directly redirect to required page.
+  ```tsx
+  'use client'
+  import { useRouter } from 'next/navigation'
+  import React, { useEffect } from 'react'
+
+  const page = () => {
+      const router = useRouter();
+      useEffect(()=>{
+          const fetchData = async () => {
+              // get the data from the api
+              const response = await fetch('http://localhost:3000/api/auth/google/is-registered');
+              
+              //check email already registered or not
+              if(response.ok){
+                  const response = await fetch('http://localhost:3000/api/auth/google/session',{
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                });
+
+                if(response.ok){
+                    //redirect to user page
+                    router.push('/auth/user');
+                }
+              }
+              else{
+                  //redirect to google register page
+                  router.push('/register/google');
+              }
+          }
+          
+          // call the function
+          fetchData();
+          // make sure to catch any error
+          .catch(console.error);
+          //eslint-disable-next-line
+      }, [])
+
+    return (
+      //making display: none (which is hidden in tailwind) to not display that page and directly redirect to 
+      <div className='hidden'>
+          Processing...
+      </div>
+    )
+  }
+
+  export default page
+  ```
+
+- If user is not registered redirect to another page(route) to get details (name,password, etc) and create a backend route to register and save user to DB and finally hit the login endpoint of backend(using email and password) and redirect to auth/user.
+  ```tsx
+      const handleSubmit = async()=>{
+          setIsLoading(true);
+
+          const response = await fetch('http://localhost:3000/api/auth/google/register',{
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              firstName,
+              lastName,
+              password,
+              confirmPassword
+            })
+          });
+
+          const data = await response.json();
+          setIsLoading(false);
+          setMessage(data.message);
+
+          if(response.ok){
+              //login the user
+              const response = await fetch('http://localhost:3000/api/auth/login',{
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    email,
+                    password,
+                  })
+                });
+
+                if(response.ok){
+                  router.push('/auth/user')
+                }
+          }
+      }
+  ```
+
+- If user is registered already then sign the token and create a cookie using backend endpoint and finally redirect to auth/user.
 
 - Create a logout for user page:
-```tsx
-import { useSession, signOut } from "next-auth/react"
-//logout
-<button onClick={ ()=>{ signOut({ callbackUrl: 'http://localhost:3000/' }); } } className='w-[150px] border-2 rounded-md bg-blue-400'>Logout</button>
+  ```tsx
+  import { useSession, signOut } from "next-auth/react"
+  //logout
+  <button onClick={ ()=>{ signOut({ callbackUrl: 'http://localhost:3000/' }); } } className='w-[150px] border-2 rounded-md bg-blue-400'>Logout</button>
+  ```
 
-//session
-const { data: session } = useSession();
+- Add below code in layout.tsx to use session:
+  ```tsx
+  'use client'
 
-<div>
-      {
-      session && session.user ? (
-      <section className='pt-[20px]'>
-        
-      </section>
-      ) : 
-      (
-        <p>You need to sign in to access</p>
-      )
+  <body className={inter.className}>
+    <SessionProvider>
+      <Header />
+        {children}
+      <Footer />
+    </SessionProvider>
+  </body>
+  ```
+
+### Protect Route
+- To protect a route in Next.js the general logic is:
+  1. Check if a user is authenticated
+  2. If they are authenticated, fetch data and render the page
+  3. If they are not authenticated, redirect the user to the login page or return an "unauthorized" response
+- Create a route(server - api/auth/is-authenticated) which checks the user is authenticated or not using cookies/token.
+- Create a protectRoute component at client:
+  ```tsx
+  import { useRouter } from 'next/navigation';
+  import React, { useEffect } from 'react';
+
+  const isAuthenticated = (Component: any) => {
+    return (props: any) => {
+      const router = useRouter();
+
+      const checkAuthentication = async () => {
+        const response = await fetch('http://localhost:3000/api/auth/is-authenticated', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+
+        const isAuth = response.ok;
+        return isAuth;
+      };
+
+      useEffect(() => {
+        const fetchData = async () => {
+          const isAuth = await checkAuthentication();
+          if (!isAuth) {
+            router.push('/login'); // Redirect to login page if not authenticated
+          }
+        };
+
+        fetchData();
+      }, []);
+
+      if (!Component) {
+        return null;
+      } else {
+        return <Component {...props} />;
       }
-    </div>
-```
+    };
+  };
+
+  export default isAuthenticated;
+  ```
+- use this component as a higher order component to protect page during export:
+  ```tsx
+  export default IsAuthenticated(page)
+  ```

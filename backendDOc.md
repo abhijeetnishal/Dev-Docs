@@ -85,6 +85,7 @@
 - visit:
     - https://www.freecodecamp.org/news/set-up-aws-simple-email-service/
     - https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/ses-examples-sending-email.html
+    - https://www.workfall.com/learning/blog/how-to-create-and-delete-email-templates-on-amazon-ses-using-node-js-and-postman-api/
 
 ### Create a google credentials(client_id and client_secret)
 - First go to https://console.cloud.google.com/projectcreate?previousPage=%2Fapis%2Fcredentials%3Fcloudshell%3Dtrue%26project%3Ddouble-genius-390404&organizationId=0&cloudshell=true to create a project if not created.
