@@ -1,3 +1,9 @@
+### Lazy Loading in React:
+- In React, lazy loading refers to a technique where you delay the loading of certain components or resources until they are actually needed.
+- Normally, when a React application is loaded, all the components and resources are loaded upfront, which can increase the initial loading time and consume unnecessary resources. This can slow down the initial loading time of your application, especially if you have many components or if some components are large.
+- Lazy loading helps improve performance by splitting your application into smaller chunks and loading them on-demand.
+- Imagine you have a web page with multiple sections, and each section has its own component. With lazy loading, instead of loading all the components when the page loads, you can load only the components that are visible on the screen. As the user scrolls down the page and new components become visible, those components are loaded on-demand.
+
 ### Fix react-scripts error:
 1. If error due to network(slow network), then run command: 
 ```bash

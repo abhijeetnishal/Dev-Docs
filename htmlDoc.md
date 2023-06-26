@@ -6,3 +6,8 @@
     
 ### Semantic HTML
 - visit: https://www.semrush.com/blog/semantic-html5-guide/
+
+### SEO
+- visit: https://www.semrush.com/blog/learn-seo/
+
+
