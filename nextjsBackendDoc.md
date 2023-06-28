@@ -1,17 +1,3 @@
-### Nextjs redirect
-```js
-import { useRouter } from 'next/navigation';
-
-const page = () => {
-  const router = useRouter();
-
-  if(response.ok){
-      // Redirect to another page
-      router.push('/login');
-  }
-}
-```
-
 ### Creating API routes in nextjs using MongoDB:
 1. Install mongoose using npm i mongoose.
 2. create a folder called models in app directory and create a file called dbconnection.ts and add code to connect db (see dbConnection.ts for reference)
@@ -19,9 +5,6 @@ const page = () => {
 4. Now DB and Schema part is completed, now create an api route in nextjs using api routing(create a folder name api inside this folder create another folder auth and inside auth folder create folder like register and login and inside these folders create a file route.ts) refer api folder to understand better.
 5. Now inside route.ts file write code for register and login as we do in auth controller file in express. (see route.ts file of register or login to understand some code changes in nextjs)
 6. Test API routes using postman by using http methods and correct url (api/auth/register) as we created api route using nextjs api routing method. We can use this routes in frontend also using http://localhost:3000/api/auth/login
-
-### TypeError: Cannot read properties of undefined (reading 'headers') at eval
-- Always return the NextResponse like: return NextResponse.json({message: 'user data'}, {status: 200});
 
 ### Cookies in nextjs:
 1. Set cookie:
@@ -278,55 +261,3 @@ export async function POST() {
   </body>
   ```
 
-### Protect Route
-- To protect a route in Next.js the general logic is:
-  1. Check if a user is authenticated
-  2. If they are authenticated, fetch data and render the page
-  3. If they are not authenticated, redirect the user to the login page or return an "unauthorized" response
-- Create a route(server - api/auth/is-authenticated) which checks the user is authenticated or not using cookies/token.
-- Create a protectRoute component at client:
-  ```tsx
-  import { useRouter } from 'next/navigation';
-  import React, { useEffect } from 'react';
-
-  const isAuthenticated = (Component: any) => {
-    return (props: any) => {
-      const router = useRouter();
-
-      const checkAuthentication = async () => {
-        const response = await fetch('http://localhost:3000/api/auth/is-authenticated', {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
-
-        const isAuth = response.ok;
-        return isAuth;
-      };
-
-      useEffect(() => {
-        const fetchData = async () => {
-          const isAuth = await checkAuthentication();
-          if (!isAuth) {
-            router.push('/login'); // Redirect to login page if not authenticated
-          }
-        };
-
-        fetchData();
-      }, []);
-
-      if (!Component) {
-        return null;
-      } else {
-        return <Component {...props} />;
-      }
-    };
-  };
-
-  export default isAuthenticated;
-  ```
-- use this component as a higher order component to protect page during export:
-  ```tsx
-  export default IsAuthenticated(page)
-  ```

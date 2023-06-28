@@ -137,3 +137,7 @@ or
   </div>
   ```
 - Logic is basicaly which all breakpoints component is hidden and which all breakpoints component is visible(using display: flex)
+
+
+### CSS Loaders
+- visit: https://cssloaders.github.io/
