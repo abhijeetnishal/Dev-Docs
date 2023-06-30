@@ -26,6 +26,9 @@
   }, [message]);
   //useEffect executed when message changes their value.
   ```
+### useRef hook in react
+-  It allows you to access and manipulate DOM elements directly.
+
 
 ### Lazy Loading in React:
 - In React, lazy loading refers to a technique where you delay the loading of certain components or resources until they are actually needed. Note that lazy loading can be used not only for components but also for other assets such as images or data. 
@@ -65,86 +68,4 @@ npm config set fetch-retry-mintimeout 20000
 npm config set fetch-retry-maxtimeout 120000
 ```
 2. Deleting node_modules folder and reinstalling will also help.
-
-
-### Creating a slider(carousel) for testimonial cards:
-1. We can easily create a sliding cards with autoplay using swiper, visit: https://swiperjs.com/ to know more about this.
-2. Simply go to above website select demo on the top.
-3. Select the desired sliding according to your need.
-4. Then select the framework in which you use.
-5. For react, First install swiper using command: npm install swiper
-6. After selecting the slider, click on react symbol in main website, it will open the file which shows that how it is created then simply copy paste the code accordingly.
-7. Refer the doteye-website repo of mine, go to src-> components -> Slider.jsx or Testimonials.jsx to undestand better.
-8. To style the pagination part change default styles using style attribute:
-```js
-    <Swiper
-        spaceBetween={30}
-        centeredSlides={true}
-        autoplay={{
-          delay: 3500,
-          disableOnInteraction: false,
-        }}
-        pagination={{
-          clickable: true,
-        }}
-        modules={[Autoplay, Pagination]}
-        className="mySwiper"
-        //change the default style a/c to need
-        style={{
-          "--swiper-pagination-color": "#ff7c08",
-          "--swiper-pagination-bullet-inactive-color": "#999999",
-          "--swiper-pagination-bullet-inactive-opacity": "1",
-          "--swiper-pagination-bullet-size": "16px",
-          "--swiper-pagination-bullet-horizontal-gap": "6px"
-        }}
-        //similarly find styles for other such as navigation.
-      >
-        <SwiperSlide><SliderCard/></SwiperSlide>
-        <SwiperSlide><SliderCardReverse/></SwiperSlide>
-        <SwiperSlide><Slider2Card/></SwiperSlide>
-        <SwiperSlide><SliderCard2Reverse/></SwiperSlide>
-    </Swiper>
-```
-
-### React Notification message
-- Run command: npm i react-toastify
-- Add the following code:
-  ```tsx
-  "use client"
-  import React, { useEffect, useState } from 'react'
-  import { ToastContainer, toast } from 'react-toastify';
-  import 'react-toastify/dist/ReactToastify.css';
-
-  const page = () => {
-      const [message, setMessage] = useState('');
-
-      useEffect(() => {
-          if(statusCode === 200){
-              toast.success(message, {
-                  position: toast.POSITION.TOP_CENTER,
-                });
-          }
-          else if(message) {
-            toast.error(message, {
-              position: toast.POSITION.TOP_CENTER,
-            });
-          }
-          //reset the message to an empty string to again show notification 
-          //due message in dependency array
-          setMessage('');
-        }, [message]);
-        //useEffect executed when message changes their value.
-
-    return (
-      <main className='flex flex-col h-[calc(100vh-20px-40px)]'>
-          <ToastContainer autoClose={3000} />
-      </main>
-    )
-  }
-
-  export default page
-  ```
-- To get the example code visit: https://github.com/abhijeetnishal/DoteyeProject/blob/master/src/app/register/page.tsx
-
-- To understand methods and custom setting visit: https://fkhadra.github.io/react-toastify/autoClose
 
