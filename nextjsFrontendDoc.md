@@ -74,6 +74,22 @@
 ### TypeError: Cannot read properties of undefined (reading 'headers') at eval
 - Always return the NextResponse like: return NextResponse.json({message: 'user data'}, {status: 200});
 
+### warning: prop `classname` did not match. server error on browser
+- Add this code to next.config.js
+```js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    appDir: true,
+  },
+  compiler: {
+    styledComponents: true,
+  },
+}
+
+module.exports = nextConfig
+```
+
 ### Protect Route
 - To protect a route in Next.js the general logic is:
   1. Check if a user is authenticated
@@ -330,3 +346,51 @@
       )
     }
   ```
+4. Doughnut Chart
+```tsx
+const DonotChart: React.FC<DonotChartProps> = ({data, labels, colors})=>{
+
+    const donotChartRef = useRef<HTMLCanvasElement>(null);
+
+    useEffect(()=>{
+        if(donotChartRef.current){
+            const donotContext = donotChartRef.current.getContext('2d');
+
+            if(donotContext){
+                const configuration: ChartConfiguration = {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                          {
+                            //data of labels which is x-axis like 20, 43, 32, etc
+                            data,
+                            //CSS of bar
+                            backgroundColor: colors,
+                            borderRadius: 5,
+                            barPercentage: 0
+                          },
+                        ],
+                      },
+                      
+                      options: {
+                        responsive: true,
+                      },
+                };
+
+                if(chart){
+                    chart.destroy();
+                    chart = new Chart( donotContext, configuration);
+                }
+                else{
+                    chart = new Chart( donotContext, configuration);
+                }
+            };
+        }
+    }, [data, labels, colors])
+
+    return (
+        <canvas ref={donotChartRef}></canvas>
+    )
+}
+```

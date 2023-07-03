@@ -142,7 +142,13 @@ export async function POST() {
   const session = await getServerSession(authOptions);
 
   //get email through session
-  const email = session?.user?.email;
+  const email = session?.user?.email as string;
+
+  //get name through session
+  const fullName = session?.user?.name as string;
+
+  //get image through session
+  const image = session?.user?.image as string;
   ```
 
 - create a redirection page where we check the user is registered with google or not.
@@ -260,4 +266,4 @@ export async function POST() {
     </SessionProvider>
   </body>
   ```
-
+  
