@@ -12,6 +12,18 @@
     }
     ```
 
+### image in nextjs
+```tsx
+//src={profileIcon.src} -> this is for image present in asset/public folder
+//src={image} -> this is for image string get from session
+<figure className='flex items-center'>
+  {
+      image? (<img className='h-[30px] w-[30px] border rounded-2xl' src={image} alt='' />) 
+      : (<img className='h-[30px] w-[30px]' src={profileIcon.src} alt='' />)
+  }
+</figure>
+```
+
 ### Show/Hide password in input field
     ```tsx
     "use client"
@@ -71,6 +83,25 @@
     }
     ```
 
+### Cookies in client side:
+- Visit this site https://www.npmjs.com/package/cookies-next
+
+### Error: Text content does not match server-rendered HTML.
+```tsx
+    const [hydration, setHydration] = useState(false);
+
+    useEffect(()=>{
+        setHydration(true);
+    })
+
+    //add where error is occured
+    <h3 className='text-xl font-Noto_Serif font-semibold'>
+        {  
+            hydration && userName? userName : 'loading...'
+        }
+    </h3>
+```
+
 ### TypeError: Cannot read properties of undefined (reading 'headers') at eval
 - Always return the NextResponse like: return NextResponse.json({message: 'user data'}, {status: 200});
 
@@ -89,6 +120,66 @@ const nextConfig = {
 
 module.exports = nextConfig
 ```
+
+### Get current date:
+```tsx
+import React from 'react'
+
+const formatDate = (date: Date): string => {
+    const options: any = { month: 'long', year: 'numeric' };
+    const formattedDate = new Intl.DateTimeFormat('en-IN', options).format(date);
+  
+    const day = date.getDate();
+    let suffix = 'th';
+    if (day === 1 || day === 21 || day === 31) {
+      suffix = 'st';
+    } else if (day === 2 || day === 22) {
+      suffix = 'nd';
+    } else if (day === 3 || day === 23) {
+      suffix = 'rd';
+    }
+  
+    return `${day}${suffix} ${formattedDate}`;
+};
+
+const CurrentDate = () => {
+    const currentDate = formatDate(new Date());
+
+  return (
+    <main>
+        {
+            currentDate
+        }
+    </main>
+  )
+}
+
+export default CurrentDate
+```
+
+### Render Video:
+- Run command: npm i react-player
+- Create a component named LiveVideo.tsx
+```tsx
+  'use client'
+  import React from 'react';
+  import ReactPlayer from 'react-player';
+
+  const LiveVideo = ()=>{
+      return(
+          <ReactPlayer url='/assets/Heat_Map.mp4' playing loop width={450} height={500} />
+      )
+  }
+
+  export default LiveVideo;
+```
+- Use this component in main component to render:
+```tsx
+  {
+      hydration && <LiveVideo />
+  }
+```
+
 
 ### Protect Route
 - To protect a route in Next.js the general logic is:
@@ -292,6 +383,12 @@ module.exports = nextConfig
                   ],
                 },
                 options: {
+                  //hide labels inside datasets
+                  plugins: {
+                    legend: {
+                      display: false, // Hide the legend
+                    },
+                  },
                   responsive: true,
                   scales: {
                       x: {
@@ -393,4 +490,8 @@ const DonotChart: React.FC<DonotChartProps> = ({data, labels, colors})=>{
         <canvas ref={donotChartRef}></canvas>
     )
 }
+```
+5. Radar Chart:
+```tsx
+
 ```

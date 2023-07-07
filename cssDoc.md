@@ -1,6 +1,13 @@
 ### 1. Classname Convention:
 * It is important to give different classname for styling for each and every file to work perfectly.
 
+### Vertical text
+```tsx
+  <aside style={{writingMode: 'vertical-rl', transform: 'rotate(180deg)'}}>
+    Footfall count
+  </aside>
+```
+
 ### 2. How to center the item with position absolute:
 ```css
 .messageDiv{
