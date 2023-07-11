@@ -180,6 +180,54 @@ export default CurrentDate
   }
 ```
 
+### Calendar with Modal container
+-  Create a Calendar with Modal and closes on clicking on screen outside the container
+- run command: npm i react-calendar
+```tsx
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+
+const DashboardNavbar = (props: Props) => {
+    const [isCalendarBtnClicked, setIsCalendarBtnClicked] = useState(false);
+
+    const calendarBtnClickFunc = ()=>{
+        setIsCalendarBtnClicked(!isCalendarBtnClicked);
+    }
+    useEffect(() => {
+        const handleOutsideClick = (event: any) => {
+          if (!event.target.closest('.modal-content')) {
+            setIsCalendarBtnClicked(false);
+          }
+        };
+    
+        document.addEventListener('mousedown', handleOutsideClick);
+    
+        return () => {
+          document.removeEventListener('mousedown', handleOutsideClick);
+        };
+      }, []);
+
+      return(
+        <section>
+        {
+            isCalendarBtnClicked ? 
+            (
+                <section id='.modal-content' className='fixed inset-0 z-10'>
+                    <section className='fixed top-[40px] transform translate-x-1/2 translate-y-1/2 flex bg-white shadow-lg rounded-2xl z-10'>
+                        <Calendar />
+                    </section>
+                </section>
+            ) :
+            (
+                <section>
+                </section>
+            )
+        }
+        </section>
+      )
+
+}
+```
 
 ### Protect Route
 - To protect a route in Next.js the general logic is:

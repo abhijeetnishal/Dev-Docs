@@ -55,6 +55,32 @@
 - On the client, the HTML is used to show a fast non-interactive page, while React uses the JSON data and JavaScript instructions to make components interactive (for example, attaching event handlers to a button). This process is called hydration.
 - With Static Site Generation, the HTML is generated on the server, but unlike server-side rendering, there is no server at runtime. Instead, content is generated once, at build time, when the application is deployed, and the HTML is stored in a CDN and re-used for each request.
 
+### Layouts
+- A layout is UI that is shared between multiple pages. On navigation, layouts preserve state, remain interactive, and do not re-render. Layouts can also be nested.
+- You can define a layout by default exporting a React component from a layout.js file. The component should accept a children prop that will be populated with a child layout (if it exists) or a child page during rendering.
+- Let's consider we have a Dashboard(DotEYE project) which contains various components and some components are same in every page when we click button on specific component(like store data, visitors data, etc) only one component(dynamic) changes. This can be done using layout of nextjs.
+- To do this create a layout.tsx in dashboard directory:
+```tsx
+    export default function DashboardLayout({
+    children, // will be a page or nested layout
+    }: {
+    children: React.ReactNode
+    }) {
+    //here children is prop name which is component 
+    return (
+        <section>
+        {/* Include shared UI here e.g. a header or sidebar */}
+        <nav></nav>
+    
+        {children}
+        </section>
+    )
+    }
+```
+- Now create a page.tsx file inside dashboard folder and that file will be act as children prop as a component.
+- Finally create routes and other things inside dashboard folder same as we do in Root layout as it acts as nested layout.
+- For more details, visit: https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts
+
 ### References
 - https://nextjs.org/learn/foundations/about-nextjs
 
