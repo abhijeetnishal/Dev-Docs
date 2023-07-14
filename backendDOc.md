@@ -13,17 +13,19 @@
 - By setting the HttpOnly flag, the cookie becomes restricted to being transmitted only via HTTP or HTTPS requests, preventing access from other methods like JavaScript's Document.cookie property. This helps protect against cross-site scripting (XSS) attacks, where an attacker tries to inject malicious scripts into a website to steal sensitive information, such as session cookies.
 - visit this to understand better: https://javascript.plainenglish.io/next-js-secure-authentication-using-http-only-cookie-graphql-or-rest-a4ef94cec9e8
 
-### Reset password(my-approach)
+### Reset password
 
-1. First verify the email i.e. account registered or not.
-2. If email doesn't exist return email not registered.
+1. First verify the email i.e. account registered or not using api/password-reset/verify-email route.
+2. If email doesn't exist return email not registered when forget password button clicked.
 3. If email verified means it is registered in DB then I follow these steps:
-   1. Send verification code to registered email.
-   2. Ask user to enter code send to their email.
-   3. Verify the code enter by user with the code you sent.
-   4. If code doesn't matches then return enter valid code .
-   5. If code matches then ask user to enter new password and new confirm password.
-   6. Finally update the hashed password in DB.
+   1. Open a new page where user enters any email to send verification code(client side) and at backend side create a schema in SQLite by hitting this endpoint once: api/password-reset/create-schema(visit nextjsBackend to know code).
+   2. Send verification code to email entered by user through api/password-reset/send-code route and also store in SQLite.
+   3. Ask user to enter code, send to their email in client side.
+   4. Verify the code enter by user with the code you get from SQLite DB by email stored in cookies, through api/password-reset/verify-code route. 
+   5. If code doesn't matches then return enter valid code.
+   6. If code matches then ask user to enter new password and new confirm password.
+   7. Finally update the hashed password in DB(mongoDB).
+- Refer nextjs (Doteye) project for better understanding.
 
 ### Random number generator:
 

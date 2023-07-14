@@ -7,6 +7,87 @@
 5. Now inside route.ts file write code for register and login as we do in auth controller file in express. (see route.ts file of register or login to understand some code changes in nextjs)
 6. Test API routes using postman by using http methods and correct url (api/auth/register) as we created api route using nextjs api routing method. We can use this routes in frontend also using http://localhost:3000/api/auth/login
 
+### Connect SQLite
+- create a file named sqlConnect.ts in folder models.
+```ts
+  //import the sqlite3 module
+  import sqlite3 from 'sqlite3'
+
+  //create a function to connect sqlite
+  const connectSqlite = async ()=>{
+      //the execution mode is set to verbose to produce long stack traces
+      const sqlite = sqlite3.verbose();
+
+      //create a database instanace for sqlite
+      //create a file with name otp.db in project root folder
+      let db = new sqlite.Database('./otp.db', (error) => {
+        if(error) {
+          console.error(error.message);
+        }
+        console.log('Connected to SQLite');
+      });
+
+      return db;
+  }
+
+  //export the method
+  export default connectSqlite
+```
+
+### Create schema in SQLite
+```ts
+  //create schema by hitting endpoint once: /api/password-reset/create-schema 
+  import connectSqlite from "@/models/sqliteConnect";
+  import { NextResponse } from "next/server";
+
+  export async function POST(){
+      //get database instance
+      const db = await connectSqlite();
+
+      //create a Promise schema which store the response
+      const schema = await new Promise((resolve, reject)=>{
+          //create table named otp_schema with column -> email, otp and expiration_time
+          db.run('CREATE TABLE otp_schema (email TEXT PRIMARY KEY, otp TEXT, expiration_time INTEGER)', (error)=> {
+              if(!error) 
+                  resolve('otp_schema created successfully');
+              else 
+                  resolve(error.message);  
+          });
+      });
+
+      return NextResponse.json({ message: schema }, {status: 200});    
+  }
+```
+
+### Insert and get Data in SQLite:
+```ts
+  //get sqlite DB instance
+  const db = await connectSqlite();
+
+  //insert email, otp and expiration_time into sqlite DB
+  db.run('INSERT INTO otp_schema (email, otp, expiration_time) VALUES (?, ?, ?)', [email, verificationCode, expiration_time], function(err) {
+    if (err) {
+      console.error(err.message);
+    } else {
+      console.log('Data inserted successfully.');
+    }
+  });
+
+  //get the verification code send from server through cookies
+  const row = await new Promise((resolve, reject) => {
+      db.get('SELECT otp FROM otpschema WHERE email = ?', [email], (error, row: {otp: string}) => {
+        if(error) {
+          resolve(error);
+        } 
+        else {
+          resolve(row?.otp);
+        }
+      });
+  });
+  
+  const serverVerificationCode = row;
+```
+
 ### Cookies in nextjs:
 
 1. Set cookie:
@@ -58,8 +139,8 @@ response.cookies.delete("jwt");
 
 ### Access Token and Refresh Token in oAuth2.0:
 
-- Generated during login route and userId will be used as a payload of jwt.
-- We can use access token for short time while refresh token for longer time.
+- Generated during login route and userId will be used as a payload of jwt. 
+- We can use access token for short time while refresh token for longer time. 
 - Since access token expiration time is less so we need refresh token to refresh the access token i.e. we again sign the access token after verifing the refresh token so to create a new access token after expiring to give extra security (a/c to oAth2.0).
 - For verification, userId and refreshing the access token, we use cookies(local storage).
 - Refresh token code:

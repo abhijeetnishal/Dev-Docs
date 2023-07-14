@@ -157,6 +157,37 @@ const CurrentDate = () => {
 export default CurrentDate
 ```
 
+### Get current routes name:
+- To get current route name of client and to use in layout.
+```tsx
+import { usePathname } from 'next/navigation'
+
+export default function DashboardLayout({
+    children, // will be a page or nested layout
+  }: {
+    children: React.ReactNode
+  }) {
+    //get current to route to render on dashboard header
+    const router = usePathname();
+    const dashboardType = router.split("/").slice(2).join("/");
+    return (
+      <section className='w-full flex flex-row'>
+        {/* Include shared UI here e.g. a header or sidebar */}
+        <DashboardSidebar />
+        <section className='w-[calc(100%-216px)] flex flex-col'>
+          <header className='p-[5px]'>
+              <DashboardHeader category={dashboardType} />
+          </header>
+          <nav className='p-[5px]'>
+              <DashboardNavbar totalFootfalls={21} groupFootfalls={4} individualFootfalls={9} averageDwellTime={27.57} maxVisitorsPerHour={2520} />
+          </nav>
+          {children}
+        </section>
+      </section>
+    )
+  }
+```
+
 ### Render Video:
 - Run command: npm i react-player
 - Create a component named LiveVideo.tsx
@@ -180,7 +211,7 @@ export default CurrentDate
   }
 ```
 
-### Calendar with Modal container
+### Simple Modal container
 -  Create a Calendar with Modal and closes on clicking on screen outside the container
 - run command: npm i react-calendar
 ```tsx
@@ -193,27 +224,14 @@ const DashboardNavbar = (props: Props) => {
     const calendarBtnClickFunc = ()=>{
         setIsCalendarBtnClicked(!isCalendarBtnClicked);
     }
-    useEffect(() => {
-        const handleOutsideClick = (event: any) => {
-          if (!event.target.closest('.modal-content')) {
-            setIsCalendarBtnClicked(false);
-          }
-        };
-    
-        document.addEventListener('mousedown', handleOutsideClick);
-    
-        return () => {
-          document.removeEventListener('mousedown', handleOutsideClick);
-        };
-      }, []);
-
+   
       return(
         <section>
         {
             isCalendarBtnClicked ? 
             (
-                <section id='.modal-content' className='fixed inset-0 z-10'>
-                    <section className='fixed top-[40px] transform translate-x-1/2 translate-y-1/2 flex bg-white shadow-lg rounded-2xl z-10'>
+                <section className='fixed w-fit inset-0 z-10'>
+                    <section className='fixed top-[40px] transform translate-x-1/2 translate-y-1/2 flex bg-white shadow-lg rounded-2xl'>
                         <Calendar />
                     </section>
                 </section>

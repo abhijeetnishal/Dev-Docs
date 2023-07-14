@@ -69,3 +69,6 @@ npm config set fetch-retry-maxtimeout 120000
 ```
 2. Deleting node_modules folder and reinstalling will also help.
 
+
+### Context API
+- https://www.freecodecamp.org/news/context-api-in-react/

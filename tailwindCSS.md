@@ -63,6 +63,9 @@ Some of the utility classes:
     <div className='w-full px-[440px] sm:px-[100px] md:px-[140px] lg:px-[300px] xl:px-[420px] 2xl:px-[560px]'>
     ```
 
+### How to Add new Font
+- visit: https://blog.logrocket.com/how-to-use-custom-fonts-tailwind-css/
+
 ### calc in tailwind
 - h-[calc(100vh-50px)]
 
