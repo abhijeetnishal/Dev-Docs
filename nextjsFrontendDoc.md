@@ -12,6 +12,10 @@
     }
     ```
 
+### Production build issue(vercel)
+- use component name i.e. when creating component name should be Page.ts not page.ts which is created by default.
+- sometimes changes of file name in development doesn't changes at github as it takes previous commit name so it's necessary to change the file on github else in production it throws error.
+
 ### image in nextjs
 ```tsx
 //src={profileIcon.src} -> this is for image present in asset/public folder
@@ -254,12 +258,13 @@ const DashboardNavbar = (props: Props) => {
   3. If they are not authenticated, redirect the user to the login page or return an "unauthorized" response
 - Create a route(server - api/auth/is-authenticated) which checks the user is authenticated or not using cookies/token.
 - Create a protectRoute component at client:
-  ```tsx
+```tsx
+  'use client'
   import { useRouter } from 'next/navigation';
   import React, { useEffect } from 'react';
 
-  const isAuthenticated = (Component: any) => {
-    return (props: any) => {
+  const IsAuthenticated = (Component: any) => {
+    const WrappedComponent = (props: any) => {
       const router = useRouter();
 
       const checkAuthentication = async () => {
@@ -278,7 +283,7 @@ const DashboardNavbar = (props: Props) => {
         const fetchData = async () => {
           const isAuth = await checkAuthentication();
           if (!isAuth) {
-            router.push('/login'); // Redirect to login page if not authenticated
+            router.push('/login');
           }
         };
 
@@ -291,10 +296,12 @@ const DashboardNavbar = (props: Props) => {
         return <Component {...props} />;
       }
     };
+
+    return WrappedComponent;
   };
 
-  export default isAuthenticated;
-  ```
+  export default IsAuthenticated;
+```
 - use this component as a higher order component to protect page during export:
   ```tsx
   export default IsAuthenticated(page)
