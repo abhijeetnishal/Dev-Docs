@@ -1,3 +1,49 @@
+### Connect mongoDB:
+- create a folder named lib insidesrc directory and inside this folder create a file named dbConnection.ts 
+```ts
+  //dbConnection.ts file
+
+  //Mongoose is an object data modeling (ODM) library for MongoDB and Node.js.
+  import mongoose, { ConnectOptions } from "mongoose";
+  
+  //import url from .env file
+  const uri = process.env.MONGODB_URI as string;
+
+  //these are options to ensure that the connection is done properly
+  const options = {
+    useUnifiedTopology: true as boolean,
+    useNewUrlParser: true as boolean,
+  }
+
+  //create a dbConnection promise
+  let dbConnection: Promise<mongoose.Connection>;
+
+  if(process.env.NODE_ENV === 'development') {
+      // In development mode, if the Mongoose connection is not ready,
+      // create a new connection and store the promise for future reuse.
+      if (!mongoose.connection.readyState) {
+          dbConnection = mongoose.connect(uri, options as ConnectOptions).then(() => mongoose.connection);
+      } 
+      // If the Mongoose connection is already established, reuse it.
+      else {
+          dbConnection = Promise.resolve(mongoose.connection);
+          console.log('MongoDB successfully connected');
+      }
+  } 
+  else {
+      // In production mode, create a new Mongoose connection.
+      dbConnection = mongoose.connect(uri, options as ConnectOptions).then(() => mongoose.connection);
+  }
+
+  export default dbConnection;
+```
+
+- use this connection in other files to connect MongoDB
+```ts
+  //connect DB
+  await dbConnection;
+```
+
 ### Creating API routes in nextjs using MongoDB:
 
 1. Install mongoose using npm i mongoose.

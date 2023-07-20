@@ -1,5 +1,5 @@
 ### Nextjs redirect
-    ```js
+```js
     import { useRouter } from 'next/navigation';
 
     const page = () => {
@@ -10,7 +10,10 @@
         router.push('/login');
     }
     }
-    ```
+```
+
+### API call URLs:
+- use relative url's instead of full ( like http://localhost:3000/api/auth or https://myapp.vercel.app/api/auth ), use this /api/auth/
 
 ### Production build issue(vercel)
 - use component name i.e. when creating component name should be Page.ts not page.ts which is created by default.
