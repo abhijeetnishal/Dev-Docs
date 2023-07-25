@@ -569,5 +569,60 @@ const DonotChart: React.FC<DonotChartProps> = ({data, labels, colors})=>{
 ```
 5. Radar Chart:
 ```tsx
+  'use client'
+  import { ChartConfiguration } from 'chart.js';
+  import Chart from 'chart.js/auto'
+  import React, { useEffect, useRef } from 'react'
 
+  type RadarChartProps = {
+      data: any,
+      labels: string[],
+  }
+
+  let chart: Chart;
+
+  const RadarChart: React.FC<RadarChartProps> = ({ data, labels }) => {
+
+      const radarChartRef = useRef<HTMLCanvasElement>(null);
+
+      useEffect(()=>{
+          if(radarChartRef.current){
+              const ctx = radarChartRef.current.getContext('2d');
+
+              if(ctx){
+                  const configuration: ChartConfiguration = {
+                      type: 'radar',
+                      data: {
+                              //x-axis data such as India, US, Uk, etc
+                              labels: labels,
+                              datasets: data,
+                          },
+                          options: {
+                              responsive: true,
+                              // Move the legend to the right
+                              plugins: {
+                                  legend: {
+                                  position: 'right',
+                                  },
+                              },
+                            },
+                      };
+                      if(chart){
+                          chart.destroy();
+                          chart = new Chart(ctx, configuration);
+                      }
+                      else{
+                          chart = new Chart(ctx, configuration);
+                      }
+                  }
+              }
+          }
+      , [data, labels]);
+
+    return (
+      <canvas ref={radarChartRef}></canvas>
+    )
+  }
+
+  export default RadarChart
 ```
