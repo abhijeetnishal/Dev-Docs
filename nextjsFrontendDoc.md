@@ -32,7 +32,7 @@
 ```
 
 ### Show/Hide password in input field
-    ```tsx
+```tsx
     "use client"
     import React, { useState } from 'react'
     import eye from '../../../public/eye-image.png';
@@ -88,7 +88,7 @@
             </section>
         )
     }
-    ```
+```
 
 ### Cookies in client side:
 - Visit this site https://www.npmjs.com/package/cookies-next
@@ -112,7 +112,7 @@
 ### TypeError: Cannot read properties of undefined (reading 'headers') at eval
 - Always return the NextResponse like: return NextResponse.json({message: 'user data'}, {status: 200});
 
-### warning: prop `classname` did not match. server error on browser
+### warning: prop ```classname``` did not match. server error on browser
 - Add this code to next.config.js
 ```js
 /** @type {import('next').NextConfig} */
@@ -218,6 +218,81 @@ export default function DashboardLayout({
   }
 ```
 
+### Mobile responsive navbar (Hamburger Button)
+- Content will be shown when button is clicked and disappear when button is clicked again. But the problem is when we click button inside content, the content will be still appear but navigated to respective page(remember dashboard screen of doteye).
+- To handle this problem we need global state(as data need to pass from child to parent) which can be done using context API. create a context in context folder.
+```tsx
+  import { createContext } from "react";
+
+  //this context store the state of dashboard sidenavbar button click
+  //using this we can get the state of button click globally
+  const dashboardSideNavButtonClickContext = createContext({});
+
+  export default dashboardSideNavButtonClickContext;
+```
+- This can be done using context API as we need to update data from child to parent component as we need to update the hamBtnClick state. For that we need to create a global context in layout.tsx and wrap components.
+```tsx
+function DashboardLayout({
+    children, // will be a page or nested layout
+  }: {
+    children: React.ReactNode
+  }) {
+    //This component has a state variable called "dasboardType", which is initially set to an empty string.
+    //defined a function called setDasboardType that can be used to update the value of dasboardType.
+    const [dasboardType, setDasboardType] = useState('Dashboard');
+    const [isDashboardBtnClicked, setIsDashboardBtnClicked] = useState(false);
+    
+    return (
+      //we can pass as many value as we need
+      <dashboardTypeContext.Provider value={{dasboardType, setDasboardType, isDashboardBtnClicked, setIsDashboardBtnClicked}} >
+        <main className='w-full h-full flex flex-row'>
+            {/* Include shared UI here e.g. a header or sidebar */}
+            <DashboardSidebar/>
+        </main>
+      </dashboardTypeContext.Provider>
+    )
+}
+```
+
+- Create a hamburger button which is visible only on small devices(some breakpoints like xs, sm(tailwind)).
+```tsx
+  const DashboardHeader = (props: Props) => {
+    //consume context
+    const { isDashboardBtnClicked, setIsDashboardBtnClicked } = useContext(dashboardTypeContext) as any;
+
+    function setBtnClickState(){
+        setIsDashboardBtnClicked(!isDashboardBtnClicked);
+    }
+    return(
+      <section className='flex xl:hidden lg:hidden md:hidden sm:flex xs:flex pr-[10px]'>
+          <button onClick={setBtnClickState} >
+              <img src={hamBtn.src} className='w-[35px] h-[25px]' alt='network error'/>
+          </button>
+          <DashboardSidebar />
+      </section>
+    )
+  }
+```
+
+- consume state in required component and change the value using function.
+```tsx
+function DashboardSidebar() {
+    //consume context
+    const { setDasboardType } = useContext(dashboardTypeContext) as any; 
+    const { isDashboardBtnClicked ,setIsDashboardBtnClicked } = useContext(dashboardTypeContext) as any;
+  return(
+    <aside className={`${isDashboardBtnClicked ? 'flex xl:hidden lg:hidden md:hidden sm:flex xs:flex fixed top-0 left-0 z-10 transform transition-transform duration-300 ease-in-out w-[216px]' : 'flex xl:flex lg:flex md:flex sm:hidden xs:hidden'}`}>
+    {/*main content*/}
+      <button onClick={()=> { setDasboardType('Dashboard'); setIsDashboardBtnClicked(false)}} className='hover:shadow-[1px_1px_0px_1.5px_rgba(250,_140,_40,_1.5)]'>
+        <Link href='/auth/dashboard' className='h-[60px] pl-[55px] mt-[12px] flex items-center'>
+            Dashboard
+        </Link>
+      </button>
+    </aside>
+  )
+}
+```
+
 ### Simple Modal container
 -  Create a Calendar with Modal and closes on clicking on screen outside the container
 - run command: npm i react-calendar
@@ -313,41 +388,53 @@ const DashboardNavbar = (props: Props) => {
 
 ### Creating a slider(carousel) for testimonial cards:
 1. We can easily create a sliding cards with autoplay using swiper, visit: https://swiperjs.com/ to know more about this.
-2. Simply go to above website select demo on the top.
+2. Simply go to above website select demo from resources on the top.
 3. Select the desired sliding according to your need.
 4. Then select the framework in which you use.
 5. For react, First install swiper using command: npm install swiper
 6. After selecting the slider, click on react symbol in main website, it will open the file which shows that how it is created then simply copy paste the code accordingly.
 7. Refer the doteye-website repo of mine, go to src-> components -> Slider.jsx or Testimonials.jsx to undestand better.
 8. To style the pagination part change default styles using style attribute:
-```js
-    <Swiper
-        spaceBetween={30}
-        centeredSlides={true}
-        autoplay={{
-          delay: 3500,
-          disableOnInteraction: false,
-        }}
-        pagination={{
-          clickable: true,
-        }}
-        modules={[Autoplay, Pagination]}
-        className="mySwiper"
-        //change the default style a/c to need
-        style={{
-          "--swiper-pagination-color": "#ff7c08",
-          "--swiper-pagination-bullet-inactive-color": "#999999",
-          "--swiper-pagination-bullet-inactive-opacity": "1",
-          "--swiper-pagination-bullet-size": "16px",
-          "--swiper-pagination-bullet-horizontal-gap": "6px"
-        }}
-        //similarly find styles for other such as navigation.
-      >
-        <SwiperSlide><SliderCard/></SwiperSlide>
-        <SwiperSlide><SliderCardReverse/></SwiperSlide>
-        <SwiperSlide><Slider2Card/></SwiperSlide>
-        <SwiperSlide><SliderCard2Reverse/></SwiperSlide>
-    </Swiper>
+```tsx
+  // Import Swiper React components
+  import { Swiper, SwiperSlide } from "swiper/react";
+
+  // Import Swiper styles
+  import "swiper/css";
+  import "swiper/css/pagination";
+  import "swiper/css/navigation";
+
+  // import required modules
+  import  { Autoplay } from "swiper/modules";
+  import { Navigation, Pagination } from 'swiper/modules';
+
+  const Testimonials = () => {
+    return (  
+      <Swiper
+            slidesPerView={1}
+            spaceBetween={1}
+            centeredSlides={true}
+            autoplay={{
+                delay: 7500,
+                disableOnInteraction: false,
+            }}
+            loop={true}
+            pagination={{
+                clickable: true,
+            }}
+            navigation={true}
+            modules={[Autoplay, Navigation]}
+            className="mySwiper"
+            style={{
+                "--swiper-navigation-color": "#ff7c08",
+                "--swiper-navigation-size": "14px"
+            } as React.CSSProperties}
+        >
+            <SwiperSlide>
+            </SwiperSlide>
+      </Swiper>
+    )
+  }
 ```
 
 ### React Notification message
@@ -605,8 +692,17 @@ const DonotChart: React.FC<DonotChartProps> = ({data, labels, colors})=>{
                                   position: 'right',
                                   },
                               },
+                              maintainAspectRatio: false, // Prevent the chart from maintaining aspect ratio
+                              layout: {
+                                  padding: {
+                                      top: 5, // Adjust the top padding to your liking
+                                      right: 0, // Adjust the right padding to your liking
+                                      bottom: 5, // Adjust the bottom padding to your liking
+                                      left: 0, // Adjust the left padding to your liking
+                                  },
+                              },
                             },
-                      };
+                          };
                       if(chart){
                           chart.destroy();
                           chart = new Chart(ctx, configuration);
