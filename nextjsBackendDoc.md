@@ -185,11 +185,11 @@
   const serverVerificationCode = row;
 ```
 
-### How to upload video to AWS S3
+### How to upload video to AWS S3 programmatically
 - Visit: https://stackabuse.com/uploading-files-to-aws-s3-with-node-js/
 
 ### How to generate presigned url from S3
-- Install: @aws-sdk/s3-request-presigner, @aws-sdk/url-parser, @aws-sdk/protocol-http, @aws-sdk/hash-node, @aws-sdk/util-format-url 
+- Install required modules: npm i @aws-sdk/s3-request-presigner @aws-sdk/url-parser @aws-sdk/protocol-http @aws-sdk/hash-node @aws-sdk/util-format-url
 - Create an endpoint get-presigned-url
 - Add below code to route.ts
 ```ts
@@ -232,15 +232,8 @@
       }
   }
 ```
-- Send object id from postman or client after uploading to S3.
-
-
-### To get a file from data received in Postman
-- Follow these steps:
-  - Send a POST request from Postman: First, you need to send a POST request to the appropriate endpoint using Postman. Ensure that you have selected the "form-data" option in the request body.
-  - Add the file to the request: In the "form-data" section of the request body, add a key-value pair where the key is the name of the file field (e.g., "file") and the value is the file you want to upload. Set the value type to "File" and select the file using the "Choose Files" option.
-  - Receive the data on the server: On the server-side, you will receive the file data along with other form data. Depending on the server-side technology you are using (e.g., Node.js, Python, PHP, etc.), you can access the file data and process it accordingly.
-  - Save the file or perform actions: After receiving the file on the server, you can save it to a specific location, manipulate its contents, or perform any other actions based on your application's requirements.
+- Send object id from postman or client after uploading to S3 to generate Presigned url.
+- Call the get-presigned-url endpoint and pass the objectUrl received from database which is stored earlier in client to get video or image url.
 
 ### How to receive form data (postman)
 ```ts

@@ -26,6 +26,8 @@
   }, [message]);
   //useEffect executed when message changes their value.
   ```
+- ***Don't use more than one API's calls inside single useEffect try to use different useEffect for different API's with conditions.***
+
 ### useRef hook in react
 -  It allows you to access and manipulate DOM elements directly.
 
