@@ -44,8 +44,59 @@
   await dbConnection;
 ```
 
-### Creating API routes in nextjs using MongoDB:
+### Create schema inside another schema(MongoDB):
+```ts
+  import mongoose, { Schema } from "mongoose";
 
+  //transaction schema which we use in another schema as list
+  const transactionSchema = new Schema({
+      time_stamps:{
+          type: String,
+          default: null
+      },
+      visitor_area_data: {
+          type: Schema.Types.Mixed,
+          default: null
+      },
+      visitor_time_data: {
+          type: Schema.Types.Mixed,
+          default: null
+      },
+      total_footfalls_data: {
+          type: Object,
+          default: null
+      },
+      dashboard_image: {
+          type: String,
+          default: null
+      },
+      video_url: {
+          type: String,
+          default: null
+      },
+  });
+
+  //create schema for dashboard
+  const dashboardSchema = new mongoose.Schema({
+      transaction:[transactionSchema],
+      //unique and 6 digit(like url-shortener shortId)
+      camera_id: {
+          type: String,
+          default: null
+      },
+      user_id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+      }
+  }, { timestamps: true });
+
+  const dashboard = mongoose.models.Dashboard || mongoose.model("Dashboard", dashboardSchema);
+
+  export default dashboard;
+```
+
+### Creating API routes in next.js using MongoDB:
 1. Install mongoose using npm i mongoose.
 2. create a folder called models in app directory and create a file called dbconnection.ts and add code to connect db (see dbConnection.ts for reference)
 3. create a user schema in file called userModel (see userModel.ts for reference)
@@ -134,8 +185,71 @@
   const serverVerificationCode = row;
 ```
 
-### Cookies in nextjs:
+### How to upload video to AWS S3
+- Visit: https://stackabuse.com/uploading-files-to-aws-s3-with-node-js/
 
+### How to generate presigned url from S3
+- Install: @aws-sdk/s3-request-presigner, @aws-sdk/url-parser, @aws-sdk/protocol-http, @aws-sdk/hash-node, @aws-sdk/util-format-url 
+- Create an endpoint get-presigned-url
+- Add below code to route.ts
+```ts
+  import { NextRequest, NextResponse } from "next/server";
+  import { S3RequestPresigner } from "@aws-sdk/s3-request-presigner";
+  import { parseUrl } from "@aws-sdk/url-parser";
+  import { HttpRequest } from "@aws-sdk/protocol-http";
+  import { Hash } from "@aws-sdk/hash-node";
+  import { formatUrl } from "@aws-sdk/util-format-url";
+
+  export async function POST(req: NextRequest){
+      try{
+          //get object S3 Object Url from client
+          const { objectUrl } = await req.json();
+
+          //creating a new instance of the S3RequestPresigner used for generating presigned URLs.
+          const presigner = new S3RequestPresigner({
+              //AWS credentials required to sign the request
+              credentials:{
+                  accessKeyId: process.env.accessKeyId as string,
+                  secretAccessKey: process.env.secretAccessKey as string
+              },
+              //The AWS region where the S3 bucket and object reside
+              region: process.env.region as string,
+              //custom hash function used for signing the request
+              sha256: Hash.bind(null, "sha256"),
+          });
+      
+          //takes an S3 object URL, which is then parsed using the `parseUrl` function
+          const s3ObjectUrl = parseUrl(objectUrl);
+          
+          // create a GET request from S3 url.
+          const url = await presigner.presign(new HttpRequest(s3ObjectUrl));
+          const preSignedUrl = formatUrl(url);
+      
+          return NextResponse.json({preSignedUrl}, {status: 200});
+      }
+      catch(error){
+          return NextResponse.json({message: 'internal server error: '+ error}, {status: 500});
+      }
+  }
+```
+- Send object id from postman or client after uploading to S3.
+
+
+### To get a file from data received in Postman
+- Follow these steps:
+  - Send a POST request from Postman: First, you need to send a POST request to the appropriate endpoint using Postman. Ensure that you have selected the "form-data" option in the request body.
+  - Add the file to the request: In the "form-data" section of the request body, add a key-value pair where the key is the name of the file field (e.g., "file") and the value is the file you want to upload. Set the value type to "File" and select the file using the "Choose Files" option.
+  - Receive the data on the server: On the server-side, you will receive the file data along with other form data. Depending on the server-side technology you are using (e.g., Node.js, Python, PHP, etc.), you can access the file data and process it accordingly.
+  - Save the file or perform actions: After receiving the file on the server, you can save it to a specific location, manipulate its contents, or perform any other actions based on your application's requirements.
+
+### How to receive form data (postman)
+```ts
+  const formData = await req.formData();
+  const total_footfalls_data = formData.get('total_footfalls_data');
+  const visitor_area_data = formData.get('visitor_area_data');
+```
+
+### Cookies in nextjs:
 1. Set cookie:
 
 ```js
@@ -171,20 +285,17 @@ return response;
 ```
 
 2. Get cookie:
-
 ```js
     const token = req.cookies.get('jwt')?.value as string;
 ```
 
 3. Delete cookie:
-
 ```js
 let response = NextResponse.json("user logged out");
 response.cookies.delete("jwt");
 ```
 
 ### Access Token and Refresh Token in oAuth2.0:
-
 - Generated during login route and userId will be used as a payload of jwt. 
 - We can use access token for short time while refresh token for longer time. 
 - Since access token expiration time is less so we need refresh token to refresh the access token i.e. we again sign the access token after verifing the refresh token so to create a new access token after expiring to give extra security (a/c to oAth2.0).
@@ -192,64 +303,62 @@ response.cookies.delete("jwt");
 - Refresh token code:
 
 ```ts
-try {
-  //get the refresh token
-  const refreshToken = req.cookies.get("refresh_token")?.value as string;
-  if (refreshToken) {
-    //verify the refreah token
-    const isRefreshTokenVerified = jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET as string
-    );
-
-    if (isRefreshTokenVerified) {
-      //Get the user id from cookies
-      const userId = req.cookies.get("user_id")?.value as string;
-
-      //Refresh the access token
-      const newAccessToken = jwt.sign(
-        { userId },
-        process.env.ACCESS_TOKEN_SECRET as string,
-        { expiresIn: "15m" }
+  try {
+    //get the refresh token
+    const refreshToken = req.cookies.get("refresh_token")?.value as string;
+    if (refreshToken) {
+      //verify the refreah token
+      const isRefreshTokenVerified = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET as string
       );
 
-      //update the access token cookie
-      const response = NextResponse.json(
-        { message: "access token refreshed" },
-        { status: 200 }
-      );
-      response.cookies.set({
-        name: "access_token",
-        value: newAccessToken,
-        maxAge: 24 * 60 * 60,
-      });
+      if (isRefreshTokenVerified) {
+        //Get the user id from cookies
+        const userId = req.cookies.get("user_id")?.value as string;
 
-      return response;
+        //Refresh the access token
+        const newAccessToken = jwt.sign(
+          { userId },
+          process.env.ACCESS_TOKEN_SECRET as string,
+          { expiresIn: "15m" }
+        );
+
+        //update the access token cookie
+        const response = NextResponse.json(
+          { message: "access token refreshed" },
+          { status: 200 }
+        );
+        response.cookies.set({
+          name: "access_token",
+          value: newAccessToken,
+          maxAge: 24 * 60 * 60,
+        });
+
+        return response;
+      } else {
+        return NextResponse.json(
+          { message: "Refresh token not verified" },
+          { status: 401 }
+        );
+      }
     } else {
       return NextResponse.json(
-        { message: "Refresh token not verified" },
+        { message: "User not authenticated" },
         { status: 401 }
       );
     }
-  } else {
+  } catch (error) {
+    console.log(error);
     return NextResponse.json(
-      { message: "User not authenticated" },
-      { status: 401 }
+      { message: "internal server error" },
+      { status: 500 }
     );
   }
-} catch (error) {
-  console.log(error);
-  return NextResponse.json(
-    { message: "internal server error" },
-    { status: 500 }
-  );
-}
 ```
-
 - Clear all related cookies during logout to remove all data.
 
 ### Logout Functionality in nextjs:
-
 ```js
 //logout functionality
 import { NextResponse } from "next/server";
@@ -264,15 +373,13 @@ export async function POST() {
 ```
 
 ### Google Login in NextJs
-
 - Visit this site to understand some methods of nextAuth.js: https://codevoweb.com/setup-and-use-nextauth-in-nextjs-13-app-directory/?ez_vid=qYWsIiWrPiu#ezoic-pub-video-placeholder-107
 - Install next-auth using command:
-  ```ts
+```ts
   npm i next-auth
-  ```
+```
 - Create a folder named 'lib' in 'src' directory and inside 'lib' folder create a file name auth.ts and add below code:
-
-  ```ts
+```ts
   import dbConnection from "@/app/api/models/dbConnection";
   import user from "@/app/api/models/userModel";
   import NextAuth from "next-auth";
@@ -291,61 +398,59 @@ export async function POST() {
 
   const handler = NextAuth(authOptions);
   export { handler as GET, handler as POST };
-  ```
+```
 
 - Create a folder named '[...nextauth]' in 'src/api/auth' and inside this folder create a file called route.ts and add following code:
 
-  ```ts
+```ts
   import { authOptions } from "@/lib/auth";
   import NextAuth from "next-auth";
 
   const handler = NextAuth(authOptions);
   export { handler as GET, handler as POST };
-  ```
+```
 
 - After that create a frontend for login-page with google:
-
 ```ts
-import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+  import { useRouter, useSearchParams } from "next/navigation";
+  import { signIn } from "next-auth/react";
 
-const page = () => {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/auth";
+  const page = () => {
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get("callbackUrl") || "/auth";
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await signIn("google", {
-        redirect: false,
-        email: email,
-        password: password,
-        callbackUrl,
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    const onSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+        await signIn("google", {
+          redirect: false,
+          email: email,
+          password: password,
+          callbackUrl,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    return (
+      <main className="flex flex-col justify-center items-center h-[calc(100vh-20px-40px)]">
+        <header className="font-bold">Login</header>
+        <section className="pt-[20px]">
+          <button
+            onClick={onSubmit}
+            className="w-[150px] border-2 rounded-md bg-blue-400"
+          >
+            Google Login
+          </button>
+        </section>
+      </main>
+    );
   };
-
-  return (
-    <main className="flex flex-col justify-center items-center h-[calc(100vh-20px-40px)]">
-      <header className="font-bold">Login</header>
-      <section className="pt-[20px]">
-        <button
-          onClick={onSubmit}
-          className="w-[150px] border-2 rounded-md bg-blue-400"
-        >
-          Google Login
-        </button>
-      </section>
-    </main>
-  );
-};
 ```
 
 - Create a backend for checking user is registered or not(using email) with route: /api/auth/google/is-registered. Get email address using server session of nextauth.js
-
-  ```ts
+```ts
   //get session data in api route(server)
   const session = await getServerSession(authOptions);
 
@@ -357,12 +462,11 @@ const page = () => {
 
   //get image through session
   const image = session?.user?.image as string;
-  ```
+```
 
 - create a redirection page where we check the user is registered with google or not.
 - Make that page hidden to not show that page and directly redirect to required page.
-
-  ```tsx
+```tsx
   'use client'
   import { useRouter } from 'next/navigation'
   import React, { useEffect } from 'react'
@@ -410,11 +514,10 @@ const page = () => {
   }
 
   export default page
-  ```
+```
 
 - If user is not registered redirect to another page(route) to get details (name,password, etc) and create a backend route to register and save user to DB and finally hit the login endpoint of backend(using email and password) and redirect to auth/user.
-
-  ```tsx
+```tsx
   const handleSubmit = async () => {
     setIsLoading(true);
 
@@ -456,13 +559,12 @@ const page = () => {
       }
     }
   };
-  ```
+```
 
 - If user is registered already then sign the token and create a cookie using backend endpoint and finally redirect to auth/user.
 
 - Create a logout for user page:
-
-  ```tsx
+```tsx
   import { useSession, signOut } from "next-auth/react";
   //logout
   <button
@@ -473,11 +575,10 @@ const page = () => {
   >
     Logout
   </button>;
-  ```
+```
 
 - Add below code in layout.tsx to use session:
-
-  ```tsx
+```tsx
   'use client'
 
   <body className={inter.className}>
@@ -487,4 +588,4 @@ const page = () => {
       <Footer />
     </SessionProvider>
   </body>
-  ```
+```
