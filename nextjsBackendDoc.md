@@ -235,11 +235,135 @@
 - Send object id from postman or client after uploading to S3 to generate Presigned url.
 - Call the get-presigned-url endpoint and pass the objectUrl received from database which is stored earlier in client to get video or image url.
 
-### How to receive form data (postman)
+### How to receive form data (like .json file)
+- Run: ```npm install mime date-fns``` and Once it's done installing, run: ```npm install -D @types/mime``` to install the required types.
+- To upload and process file create a file name uploadAndProcessFile.ts inside middleware folder and use below code:
 ```ts
-  const formData = await req.formData();
-  const total_footfalls_data = formData.get('total_footfalls_data');
-  const visitor_area_data = formData.get('visitor_area_data');
+  //upload function which we call to uplaod and extract file
+  import { NextRequest } from "next/server";
+  import mime from "mime";
+  import { join } from "path";
+  import { stat, mkdir, writeFile } from "fs/promises";
+  import * as dateFn from "date-fns";
+  import fs from 'fs';
+  import path from 'path';
+
+  async function processFile(req: NextRequest, formData: FormData, key: string){
+      try{
+          //extract each file with specific key
+          const file = formData.get(key) as Blob | null;
+
+          //if file is not present
+          if (!file) {
+              return { error: "File blob is required." };
+          }
+
+          //In order for us to save our Blob file to the disk we need to cast it to a Buffer
+          const buffer = Buffer.from(await file.arrayBuffer());
+          
+          //define uplaod directory
+          const relativeUploadDir = `/uploads/${dateFn.format(Date.now(), "dd-MM-Y")}`;
+          //we will store the uploaded file under the public directory like /public/uploads/... 
+          const uploadDir = join(process.cwd(), "public", relativeUploadDir);
+          
+          //uplaod file
+          try {
+              await stat(uploadDir);
+          } 
+          catch (err: any) 
+          {
+              if (err.code === "ENOENT") {
+                  await mkdir(uploadDir, { recursive: true });
+              } 
+              else {
+                  console.error("Error while trying to create directory when uploading a file\n",err);
+                  return { error: "Something went wrong." };
+              }
+          }
+
+          try {
+              //give unique suffix to file
+              const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+              const filename = `${file.name.replace(
+                  /\.[^/.]+$/,
+                  ""
+              )}-${uniqueSuffix}.${mime.getExtension(file.type)}`;
+
+              //we use the writeFile from fs/promises to save our file to the uploads directory on disk.
+              await writeFile(`${uploadDir}/${filename}`, buffer);
+
+              //file directory
+              const filePath = path.join(process.cwd(), `public/${relativeUploadDir}/${filename}`);
+              
+              //read file
+              const jsonData = fs.readFileSync(filePath, 'utf-8');
+              const data = JSON.parse(jsonData);
+              //console.log(data);
+
+              return data;
+          } 
+          catch(e) 
+          {
+              console.error("Error while trying to upload a file\n", e);
+              return { error: "Something went wrong." };
+          }
+      }
+      catch(error){
+          return {message: 'internal server error ' + error};
+      }
+  }
+
+  export default processFile;
+```
+- Visit to understand better for upload file: https://codersteps.com/articles/building-a-file-uploader-from-scratch-with-next-js-app-directory
+
+- Create an API endpoint to get file data using form data and call above function to uplaod and process files.
+```ts
+  import isAuthenticated from "@/middlewares/jwtAuth";
+  import { NextRequest, NextResponse } from "next/server";
+  import processFile from "../../../../middlewares/uploadAndProcessFile";
+
+  interface MyObject {
+      [key: string]: any[];
+  }
+
+  //create an object to store these data
+  const dataObject: MyObject = {};
+
+  export async function POST(req: NextRequest){
+      try{
+          //check user is authenticated or not
+          const isAuth = isAuthenticated(req);
+
+          if(isAuth){
+              //get the userId from cookie
+              const user_id = req.cookies.get('user_id')?.value;
+
+              //get file from client
+              const formData = await req.formData();
+
+              //convert the FormData to a regular JavaScript object
+              const formObject = Object.fromEntries(formData);
+
+              //extract the keys (name properties) from the object
+              const keys = Object.keys(formObject);
+
+              //iterate through each key and store data 
+              for(const key of keys){
+                  const processedfile = await processFile(req, formData, key);
+                  dataObject[key] = processedfile;
+              }
+
+              return NextResponse.json({dataObject}, {status: 200});
+          }
+          else{
+              return NextResponse.json({message: 'user not authenticated'}, {status: 401});
+          }
+      }
+      catch(error){
+          return NextResponse.json({message: 'internal server error ' + error}, {status: 500});
+      }
+  }
 ```
 
 ### Cookies in nextjs:
