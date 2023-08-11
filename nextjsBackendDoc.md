@@ -1,100 +1,92 @@
 ### Connect mongoDB:
-- create a folder named lib insidesrc directory and inside this folder create a file named dbConnection.ts 
+- create a folder named lib inside src directory and inside this folder create a file named dbConnection.ts 
 ```ts
-  //dbConnection.ts file
+  //using mongoDB library 
+  import { MongoClient } from "mongodb";
 
-  //Mongoose is an object data modeling (ODM) library for MongoDB and Node.js.
-  import mongoose, { ConnectOptions } from "mongoose";
-  
-  //import url from .env file
-  const uri = process.env.MONGODB_URI as string;
+  const uri = process.env.MONGO_URI as string;
+  const options: any = {
+      useUnifiedTopology: true,
+      useNewUrlParser: true,
+  };
 
-  //these are options to ensure that the connection is done properly
-  const options = {
-    useUnifiedTopology: true as boolean,
-    useNewUrlParser: true as boolean,
-  }
+  let mongoClient: any = null;
 
-  //create a dbConnection promise
-  let dbConnection: Promise<mongoose.Connection>;
-
-  if(process.env.NODE_ENV === 'development') {
-      // In development mode, if the Mongoose connection is not ready,
-      // create a new connection and store the promise for future reuse.
-      if (!mongoose.connection.readyState) {
-          dbConnection = mongoose.connect(uri, options as ConnectOptions).then(() => mongoose.connection);
-      } 
-      // If the Mongoose connection is already established, reuse it.
-      else {
-          dbConnection = Promise.resolve(mongoose.connection);
-          console.log('MongoDB successfully connected');
+  declare global {
+      namespace globalThis {
+        var _mongoClient: Promise<MongoClient>
       }
-  } 
-  else {
-      // In production mode, create a new Mongoose connection.
-      dbConnection = mongoose.connect(uri, options as ConnectOptions).then(() => mongoose.connection);
   }
 
-  export default dbConnection;
+  if(!process.env.MONGO_URI) {
+      throw new Error('Please add your Mongo URI')
+  }
+
+  export async function connectToDB() {
+      try {
+          if(mongoClient) {
+              return mongoClient;
+          }
+
+          if(!global._mongoClient) {
+              mongoClient = await (new MongoClient(uri, options)).connect();
+              global._mongoClient = mongoClient;
+          } 
+          else {
+              mongoClient = global._mongoClient;
+          }
+          
+          return mongoClient;
+      } 
+      catch (e) {
+          console.error(e);
+      }
+  }
 ```
 
 - use this connection in other files to connect MongoDB
 ```ts
-  //connect DB
+  //using mongoose
   await dbConnection;
+
+  //using mongodb library
+  //we need to specify collection name and db name using this library
+  const mongoClient = await connectToDB();
+  const database = mongoClient.db(process.env.MONGODB_DB_NAME);
+  const collection = database.collection(process.env.USER_COLLECTION_NAME);
 ```
 
-### Create schema inside another schema(MongoDB):
+- To find specific single data:
 ```ts
-  import mongoose, { Schema } from "mongoose";
+  import { ObjectId } from 'mongodb';
 
-  //transaction schema which we use in another schema as list
-  const transactionSchema = new Schema({
-      time_stamps:{
-          type: String,
-          default: null
-      },
-      visitor_area_data: {
-          type: Schema.Types.Mixed,
-          default: null
-      },
-      visitor_time_data: {
-          type: Schema.Types.Mixed,
-          default: null
-      },
-      total_footfalls_data: {
-          type: Object,
-          default: null
-      },
-      dashboard_image: {
-          type: String,
-          default: null
-      },
-      video_url: {
-          type: String,
-          default: null
-      },
-  });
+  function func(){
+    //connect DB
+    const mongoClient = await connectToDB();
+    const database = mongoClient.db(process.env.MONGODB_DB_NAME);
+    const collection = database.collection(process.env.USER_COLLECTION_NAME);
 
-  //create schema for dashboard
-  const dashboardSchema = new mongoose.Schema({
-      transaction:[transactionSchema],
-      //unique and 6 digit(like url-shortener shortId)
-      camera_id: {
-          type: String,
-          default: null
-      },
-      user_id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-      }
-  }, { timestamps: true });
+    //get user details from user id
+    const userDetails = await collection.findOne({_id: new ObjectId(userId)});
 
-  const dashboard = mongoose.models.Dashboard || mongoose.model("Dashboard", dashboardSchema);
-
-  export default dashboard;
+    //find using email
+    const emailExist = await collection.findOne({email: email});
+  }
 ```
+- To insert single data:
+```ts
+  //create a new user in DB
+  const timestamp = new Date();
+  const createUser = await collection.insertOne({
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    password: hashedPassword,
+    createdAt: timestamp,
+    updatedAt: timestamp
+  });
+```
+
 
 ### Creating API routes in next.js using MongoDB:
 1. Install mongoose using npm i mongoose.
