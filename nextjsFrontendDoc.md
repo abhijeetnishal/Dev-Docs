@@ -195,6 +195,18 @@ export default function DashboardLayout({
   }
 ```
 
+### Set active button:
+- Get cuurent route name using above function
+- use condition inside classname:
+```tsx
+<Link href='/auth/dashboard/store-data' className={`${dashboardType === 'store-data' ? 'bg-orange-200' : 'bg-white'} relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-orange-500 pr-6`}>
+    <span className="inline-flex justify-center items-center ml-4">
+        <img className='w-5 h-5' src={storeIcon.src} alt="" />
+    </span>
+    <span className="ml-2 text-sm tracking-wide truncate">Store Data</span>
+</Link>
+```
+
 ### Render Video:
 - Run command: npm i react-player
 - Create a component named LiveVideo.tsx
