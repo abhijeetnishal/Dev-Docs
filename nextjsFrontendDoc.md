@@ -449,20 +449,19 @@ const DashboardNavbar = (props: Props) => {
   const page = () => {
       const [message, setMessage] = useState('');
 
-      useEffect(() => {
-          if(statusCode === 200){
-              toast.success(message, {
-                  position: toast.POSITION.TOP_CENTER,
+          useEffect(() => {
+            if(statusCode === 200){
+                toast.success(message, {
+                    position: toast.POSITION.TOP_CENTER,
                 });
-          }
-          else if(message) {
-            toast.error(message, {
-              position: toast.POSITION.TOP_CENTER,
-            });
-          }
-          //reset the message to an empty string to again show notification 
-          //due message in dependency array
-          setMessage('');
+            }
+            else if(message) {
+              toast.error(message, {
+                position: toast.POSITION.TOP_CENTER,
+              });
+              //reset the message to an empty string
+              setMessage('');
+            }
         }, [message]);
         //useEffect executed when message changes their value.
 
