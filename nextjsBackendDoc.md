@@ -227,6 +227,153 @@
 - Send object id from postman or client after uploading to S3 to generate Presigned url.
 - Call the get-presigned-url endpoint and pass the objectUrl received from database which is stored earlier in client to get video or image url.
 
+### uplaod image functionality using AWS S3
+- LOGIC:
+  - First we need to upload image to AWS S3 after receiving image as form data from client(frontend).
+  - Now we need to convert form data into buffer and then store into AWS S3. Try to add file name unique(e.g.-> users/{user_id}/profile/picture.png).
+  - After uploading file to S3, we need to generate object URL which is finally stored into DB. 
+  - Now object URL stored in the DB, we can get from DB and generate presigned URL(as we discussed above about presigned URL).
+- Create a folder(route) named update-profile-picture and inside this create a file named route.ts.
+- code for converting(processing file) from form data to buffer:
+```ts
+import mime from "mime";
+import { join } from "path";
+import { stat, mkdir, writeFile } from "fs/promises";
+import * as dateFn from "date-fns";
+import fs from 'fs';
+import path from 'path';
+
+async function processFile(formData: FormData, key: string){
+    try{
+        //if file is image 
+        if(key === 'image'){
+            //extract each file with specific key
+            const file = formData.get(key) as Blob | null;
+
+            //if file is not present
+            if (!file) {
+                return { error: "File blob is required." };
+            }
+
+            //In order for us to save our Blob file to the disk we need to cast it to a Buffer
+            const buffer = Buffer.from(await file.arrayBuffer());
+
+            return buffer;
+        }
+    }
+    catch(error){
+        return {message: 'internal server error ' + error};
+    }
+}
+
+export default processFile;
+```
+- Code for above logic:
+```ts
+import { connectToDB } from "@/lib/dbConnection";
+import isAuthenticated from "@/middlewares/jwtAuth";
+import processFile from "@/middlewares/uploadAndProcessFile";
+import { ObjectId } from "mongodb";
+import { NextRequest, NextResponse } from "next/server";
+import AWS from 'aws-sdk';
+
+export async function POST(req: NextRequest){
+    try{
+        //check user is authenticated or not
+        const isAuth = isAuthenticated(req);
+
+        if(isAuth){
+            //get user Id from cookies
+            const userId = req.cookies.get('user_id')?.value;
+
+            //get image from form data
+            const formData = await req.formData();
+            //console.log(formData);
+
+            if(!formData){
+                return NextResponse.json({message: 'image not uploaded'},{status: 400})
+            }
+            else{
+                //convert file into buffer to store 
+                const processedData = await processFile(formData, 'image');
+
+                //get buffer size
+                const fileSize = Buffer.byteLength(processedData);
+
+                //5 MB limit
+                const maxFileSize = 5 * 1024 * 1024;
+
+                if(fileSize > maxFileSize){
+                    return NextResponse.json({message: 'file upload limit should be less than 5MB'}, {status: 400});
+                }
+                else{
+                    //configure AWS SDK
+                    AWS.config.update({
+                        accessKeyId: process.env.accessKeyId,
+                        secretAccessKey: process.env.secretAccessKey,
+                        region: process.env.region
+                    });
+
+                    //we need to store this buffer into S3
+                    const s3 = new AWS.S3();
+
+                    //bucket name
+                    const bucketName = 'dev-doteyelabs';
+
+                    //key name
+                    const ObjectKeyName = `de_data/users/${userId}/cwi/profile/${'image.jpg'}`;
+
+                    //upload image to AWS S3
+                    s3.putObject({
+                        Bucket: bucketName,
+                        Key: ObjectKeyName,
+                        Body: processedData,
+                    }, (uploadErr) => {
+                        if(uploadErr) 
+                            console.error('error uploading to S3: ', uploadErr);
+                        else 
+                            console.log('file uploaded successfully');
+                    });
+
+                    //create object URL
+                    const objectURL = `https://${bucketName}.s3${process.env.region}.amazonaws.com/${ObjectKeyName}`;
+                    
+                    //store objectURL to DB to generate presigned URL
+                    
+                    //connect DB
+                    const mongoClient = await connectToDB();
+                    const database = mongoClient.db(process.env.MONGODB_DB_NAME);
+                    const collection = database.collection(process.env.USER_COLLECTION_NAME);
+
+                    //update image
+                    await collection.updateOne(
+                        {
+                            _id: new ObjectId(userId),
+                        },
+                        {
+                            $set: {
+                                image: objectURL
+                            }
+                        }
+                    );
+
+                    return NextResponse.json({message: 'image uploaded'}, {status: 201});
+                }
+            }
+        }
+        else{
+            return NextResponse.json({message: 'user not authenticated'}, {status: 401});
+        }
+    }
+    catch(error){
+        console.log(error);
+        return NextResponse.json({message: 'internal server error \n' + error}, {status: 500})
+    }
+}
+```
+
+- Use API in client to access image by hitting get-presigned-url route  
+
 ### How to receive form data (like .json file)
 - Run: ```npm install mime date-fns``` and Once it's done installing, run: ```npm install -D @types/mime``` to install the required types.
 - To upload and process file create a file name uploadAndProcessFile.ts inside middleware folder and use below code:
@@ -357,10 +504,6 @@
       }
   }
 ```
-
-### uplaod image functionality using AWS S3
-- Create a folder(route) named update-profile-picture and inside this create a file named route.ts.
-- 
 
 ### Cookies in nextjs:
 1. Set cookie:
