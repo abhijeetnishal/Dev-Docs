@@ -31,7 +31,7 @@
 </figure>
 ```
 
-### Upload profile Image Functionality:
+### Upload profile Image Functionality using base64 encoding and storing directly into DB:
 - In client component(Frontend) add file upload functionality:
 ```tsx
 const Page = (props: Props) => {
@@ -66,40 +66,92 @@ const Page = (props: Props) => {
         setSelectedImage(base64);
     }
 
+    async function updateProfilePicture(){
+        const response = await fetch('/api/auth/profile/update-profile-details',{
+            method: 'POST',
+            headers: {
+                'content-type' : 'application/json'
+            },
+            body: JSON.stringify({
+                image: selectedImage
+            })
+        });
+
+        const data = await response.json();
+        //console.log(data);
+        setSelectedImage(data.image);
+    }
+    
+    // const removeProfilePicture = async()=>{
+    //     const response = await fetch('/api/auth/profile/update-profile-picture', {
+    //         method: 'POST',
+    //         headers: {
+    //             'content-type' : 'application/json'
+    //         },
+    //         body: JSON.stringify({
+    //             image: null
+    //         })
+    //     });
+
+    //     const data = await response.json();
+    //     setSelectedImage(data.image);
+
     return (
       <section className='w-full h-1/3 flex flex-row justify-center'>
-          {/*show image*/}
-          <figure className='flex items-center justify-center'>
-              {   
-                  selectedImage ? (<img className='h-[80px] w-[80px]' src={selectedImage} />)
-                  : (<img className='h-[80px] w-[80px]' src={profileIcon.src} alt='' />)
-              }
-          </figure>
-          {/*removing image by making state null*/}
-          <button onClick={() => setSelectedImage(null)} className="ml-[-15px] mt-[10px] inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-700 transition-colors duration-150 bg-gray-200 rounded-full focus:shadow-outline hover:bg-gray-200">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-              </svg>
-          </button>
+        <figure className='flex items-center justify-center'>
+            {   
+                selectedImage ? (<img className='h-[80px] w-[80px] rounded-[60px] border-[2px] border-gray-400' src={selectedImage} />) 
+                :
+                userImage ? (<img className='h-[80px] w-[80px] rounded-[60px]' src={userImage} />) 
+                :
+                (<img className='h-[80px] w-[80px]' src={profileIcon.src} alt='' />)
+            }
+        </figure>
+        {/* remove image functionality */}
+        {
+            selectedImage ?
+            (
+                <button onClick={()=>{ setSelectedImage(null); }} className="ml-[-15px] mt-[10px] inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-700 transition-colors duration-150 bg-gray-200 rounded-full focus:shadow-outline hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                </button>
+            )
+            :
+            (
+                null
+            )
+        }
       </section>
-
-      {/*file upload using input*/}
+      {/* file upload using input field and conditional button change */}
       <section className='flex justify-center'>
-          <input
-          id='upload'
-              type="file"
-              name="myImage"
-              className='hidden'
-              onChange={handleFileUpload}
-          />
-          <label className='flex justify-center items-center cursor-pointer w-[150px] h-[30px] bg-amber-500 rounded-[6px] shadow border border-amber-500 text-white text-[16px] font-normal font-poppins' htmlFor="upload">
-              Upload new photo
-          </label>
+        <input
+            id='upload'
+            type="file"
+            name="myImage"
+            className='hidden'
+            onChange={handleFileUpload}
+        />
+        {
+            selectedImage ?
+            (
+                <button onClick={updateProfilePicture} className='flex justify-center items-center cursor-pointer w-[150px] h-[30px] bg-amber-500 rounded-[6px] shadow border border-amber-500 text-white text-[16px] font-normal font-poppins'>
+                    Update
+                </button>
+            )
+            :
+            (
+                <label htmlFor="upload" className='flex justify-center items-center cursor-pointer w-[150px] h-[30px] bg-amber-500 rounded-[6px] shadow border border-amber-500 text-white text-[16px] font-normal font-poppins'>
+                    Upload new photo
+                </label>
+            )
+        }
       </section>
     )
 }
 ```
 - Now selectedImage will get base64 incoded data which is stored in database using API.
+
 
 ### Show/Hide password in input field
 ```tsx

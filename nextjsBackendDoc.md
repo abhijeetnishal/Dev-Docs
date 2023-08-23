@@ -358,6 +358,10 @@
   }
 ```
 
+### uplaod image functionality using AWS S3
+- Create a folder(route) named update-profile-picture and inside this create a file named route.ts.
+- 
+
 ### Cookies in nextjs:
 1. Set cookie:
 
