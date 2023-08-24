@@ -152,6 +152,112 @@ const Page = (props: Props) => {
 ```
 - Now selectedImage will get base64 incoded data which is stored in database using API.
 
+### Uplaod image using AWS S3
+- Uplaod image from client using API which upload image to S3 and then store object URL in DB.
+- After uploading image is rendered using presigned URL from object URL
+- Implementation:
+```tsx
+const Page = (props: Props) => {
+const [userImage, setUserImage] = useState<string>('');
+const [userImageObjectURL, setUserImageObjectURL] = useState<string>('');
+const [selectedImage, setSelectedImage] = useState<any>(null);
+//get user details
+    useEffect(()=>{
+        async function getProfileData(){
+            const response = await fetch('/api/auth/profile/get-profile-details',{
+                method: 'GET',
+                headers: {
+                    'content-type' : 'application/json'
+                } 
+            })
+
+            const data = await response.json();
+            setUserFirstName(data.firstName);
+            setUserLastName(data.lastName);
+            setUserEmail(data.email);
+            setUserImageObjectURL(data.image);
+            setUserPhone(data.phone);
+            setUserCity(data.city);
+        }
+        getProfileData()
+    }, []);
+
+    //presigned URL for image
+    useEffect(()=>{
+        async function fetchImage(){
+            if(userImageObjectURL){
+                const response = await fetch('/api/auth/get-presigned-url', {
+                    method: 'POST',
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        objectUrl: userImageObjectURL
+                    })
+                });
+
+                const data = await response.json();
+                setUserImage(data.preSignedUrl);
+                //console.log(imageUrl);
+            }
+        }
+        fetchImage();
+    })
+
+    return (
+      <section className='w-full h-1/3 flex flex-row justify-center'>
+        <figure className='flex items-center justify-center'>
+            {   
+                selectedImage ? (<img className='h-[80px] w-[80px] rounded-[60px] border-[2px] border-gray-400' src={URL.createObjectURL(selectedImage)} />) 
+                :
+                userImage ? (<img className='h-[80px] w-[80px] rounded-[60px]' src={userImage} />) 
+                :
+                (<img className='h-[80px] w-[80px]' src={profileIcon.src} alt='' />)
+            }
+        </figure>
+        {
+            selectedImage ?
+            (
+                <button onClick={()=>{ setSelectedImage(null); }} className="ml-[-15px] mt-[10px] inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-700 transition-colors duration-150 bg-gray-200 rounded-full focus:shadow-outline hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                </button>
+            )
+            :
+            (
+                null
+            )
+        }
+    </section>
+
+    <section className='flex justify-center'>
+    <input
+        id='upload'
+        type="file"
+        name="myImage"
+        accept="image/*"
+        className='hidden'
+        onChange={handleFileUpload}
+    />
+    {
+        selectedImage ?
+        (
+            <button onClick={()=>{updateProfilePicture(selectedImage)}} className='flex justify-center items-center cursor-pointer w-[150px] h-[30px] bg-amber-500 rounded-[6px] shadow border border-amber-500 text-white text-[16px] font-normal font-poppins'>
+                Update
+            </button>
+        )
+        :
+        (
+            <label htmlFor="upload" className='flex justify-center items-center cursor-pointer w-[150px] h-[30px] bg-amber-500 rounded-[6px] shadow border border-amber-500 text-white text-[16px] font-normal font-poppins'>
+                Upload new photo
+            </label>
+        )
+        }
+    </section>
+    )
+}
+```
 
 ### Show/Hide password in input field
 ```tsx

@@ -227,7 +227,7 @@
 - Send object id from postman or client after uploading to S3 to generate Presigned url.
 - Call the get-presigned-url endpoint and pass the objectUrl received from database which is stored earlier in client to get video or image url.
 
-### uplaod image functionality using AWS S3
+### uplaod image/video on AWS S3:
 - LOGIC:
   - First we need to upload image to AWS S3 after receiving image as form data from client(frontend).
   - Now we need to convert form data into buffer and then store into AWS S3. Try to add file name unique(e.g.-> users/{user_id}/profile/picture.png).
@@ -322,6 +322,7 @@ export async function POST(req: NextRequest){
 
                     //key name
                     const ObjectKeyName = `de_data/users/${userId}/cwi/profile/${'image.jpg'}`;
+                    // AWS automatically creates a folder using '/' symbol
 
                     //upload image to AWS S3
                     s3.putObject({
@@ -336,7 +337,7 @@ export async function POST(req: NextRequest){
                     });
 
                     //create object URL
-                    const objectURL = `https://${bucketName}.s3${process.env.region}.amazonaws.com/${ObjectKeyName}`;
+                    const objectURL = `https://${bucketName}.s3.${process.env.region}.amazonaws.com/${ObjectKeyName}`;
                     
                     //store objectURL to DB to generate presigned URL
                     
@@ -372,7 +373,7 @@ export async function POST(req: NextRequest){
 }
 ```
 
-- Use API in client to access image by hitting get-presigned-url route  
+- To access(render) image/video, hit get-presigned-url API route after receiving object URL from DB by hitting get-profile-details API route.
 
 ### How to receive form data (like .json file)
 - Run: ```npm install mime date-fns``` and Once it's done installing, run: ```npm install -D @types/mime``` to install the required types.
