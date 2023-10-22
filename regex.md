@@ -6,7 +6,7 @@ const validateEmail = (email: string)=> {
 }
 ```
 
-### Validate passwprd address
+### Validate password 
 ```ts
 function validatePassword(password: string) {
   //regex pattern for checking password length is minimum 8 characters which must include uppercase letter, lower case letter, digit and special character
