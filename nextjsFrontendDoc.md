@@ -31,6 +31,20 @@
 </figure>
 ```
 
+### Disable right click
+- The contextmenu event fires when the user attempts to open a context menu. This event is typically triggered by clicking the right mouse button, or by pressing the context menu key.
+```js
+    window.document.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
+```
+
+### getServerSideProps
+- You should use getServerSideProps only if you need to render a page whose data must be fetched at request time. 
+- getServerSideProps only runs on server-side and never runs on the browser. If a page uses getServerSideProps, then:
+  - When you request this page directly, getServerSideProps runs at request time, and this page will be pre-rendered with the returned props
+  - When you request this page on client-side page transitions through next/link or next/router, Next.js sends an API request to the server, which runs getServerSideProps
+
 ### Upload profile Image Functionality using base64 encoding and storing directly into DB:
 - In client component(Frontend) add file upload functionality:
 ```tsx
