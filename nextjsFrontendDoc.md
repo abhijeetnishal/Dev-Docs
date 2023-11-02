@@ -39,6 +39,69 @@
     });
 ```
 
+### Search functionality using query params
+```js
+const ResourceListWrapper = (props) => {
+  const router = useRouter();
+
+  //State for checking search bar is active or not
+  const [isResourceSearching, setIsResourceSearching] = useState(false);
+  //State for resource search input text
+  const [ resourceSearchText, setResourceSearchText ] = useState("");
+
+  //Resource search route
+  useEffect(()=>{
+    const delayDebounceFn = setTimeout(()=>{
+      if(isResourceSearching){
+        router.replace(
+          resourceSearchText && resourceSearchText !== ""
+          ?
+          `/manage/resources?query=${resourceSearchText}&page=1`
+          :
+          `/manage/resources?page=1`
+        )
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [resourceSearchText])
+
+  useEffect(() => {
+    const { query, page } = router.query;
+
+    let queryPage = page ? parseInt(page) : 1;
+    setActivePage(queryPage);
+
+    //API
+    getResourcesApi(
+      () => () =>
+        AdminService.getManageResources(
+          query,
+          (queryPage - 1) * limit,
+          limit,
+          type,
+          token
+        )
+    );
+  }, [router.query]);
+
+  //Function for setting resource search text
+  const onChangeQuery = (event)=>{
+    if(!isResourceSearching)
+      setIsResourceSearching(true);
+    setResourceSearchText(event.target.value);
+  }
+
+  return (
+    {/* Search input component */}
+    <SearchInput 
+      placeholder="Search resources"
+      onSearchChange={onChangeQuery}
+      value={resourceSearchText}
+    />
+  )
+```
+
 ### getServerSideProps
 - You should use getServerSideProps only if you need to render a page whose data must be fetched at request time. 
 - getServerSideProps only runs on server-side and never runs on the browser. If a page uses getServerSideProps, then:
