@@ -102,6 +102,14 @@ const ResourceListWrapper = (props) => {
   )
 ```
 
+### Dynamic routing in next.js
+- Create a folder named inside page or app directory and inside that folder create file [slug].tsx and index.tsx file.
+- Using router we can get userId or category type from index.tsx to [slug].tsx
+```ts
+  const router = useRouter();
+  const { slug } = router.query;
+```
+
 ### getServerSideProps
 - You should use getServerSideProps only if you need to render a page whose data must be fetched at request time. 
 - getServerSideProps only runs on server-side and never runs on the browser. If a page uses getServerSideProps, then:
