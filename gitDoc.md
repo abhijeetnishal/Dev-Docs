@@ -33,3 +33,14 @@ git status
     git remote set-url <remote_name> <remote_url>
 ```
 
+### How to delete branch 
+```bash
+# Switch to another branch
+git switch master
+
+# Delete the branch
+git branch -d branch_name
+
+# Force Delete the branch 
+git branch -D branch_name
+```
