@@ -235,10 +235,10 @@ const Page = (props: Props) => {
     )
 }
 ```
-- Now selectedImage will get base64 incoded data which is stored in database using API.
+- Now selectedImage will get base64 encoded data which is stored in database using API.
 
-### Uplaod image using AWS S3
-- Uplaod image from client using API which upload image to S3 and then store object URL in DB.
+### Upload image using AWS S3
+- Upload image from client using API which upload image to S3 and then store object URL in DB.
 - After uploading image is rendered using presigned URL from object URL
 - Implementation:
 ```tsx
@@ -353,7 +353,7 @@ const [selectedImage, setSelectedImage] = useState<any>(null);
     import Image from 'next/image';
 
     const page = () =>{
-        //create states for different buttons e.g.- password, confirmpassword, etc
+        //create states for different buttons e.g.- password, confirm password, etc
         const [isPasswordEyeBtnClicked, setIsPasswordEyeBtnClicked] = useState(false);
         const [isConfirmPasswordEyeBtnClicked, setIsConfirmPasswordEyeBtnClicked] = useState(false);
 
@@ -378,7 +378,7 @@ const [selectedImage, setSelectedImage] = useState<any>(null);
                     : (<Image src={eye} alt='' className="min-w-0 relative w-6"/> )
                 }
             </button>
-            This will check if btn is clicked then show eye btn else show cuteye btn
+            This will check if btn is clicked then show eye btn else show cut eye btn
         */
         return (
             <section className='flex flex-row justify-center items-center w-[370px] h-[54px] border-solid border-[#e0e5f2] outline-none shadow-[0px_4px_4px_0px_rgba(0,_0,_0,_0.1)] bg-white pl-[6px] relative h-12 items-start border rounded-lg whitespace-nowrap font-medium text-[#908a8a]'>
@@ -414,7 +414,7 @@ const [selectedImage, setSelectedImage] = useState<any>(null);
         setHydration(true);
     })
 
-    //add where error is occured
+    //add where error is occurred
     <h3 className='text-xl font-Noto_Serif font-semibold'>
         {  
             hydration && userName? userName : 'loading...'
@@ -509,8 +509,8 @@ export default function DashboardLayout({
 ```
 
 ### Set active button:
-- Get cuurent route name using above function
-- use condition inside classname:
+- Get current route name using above function
+- use condition inside className:
 ```tsx
 <Link href='/auth/dashboard/store-data' className={`${dashboardType === 'store-data' ? 'bg-orange-200' : 'bg-white'} relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-orange-500 pr-6`}>
     <span className="inline-flex justify-center items-center ml-4">
@@ -549,7 +549,7 @@ export default function DashboardLayout({
 ```tsx
   import { createContext } from "react";
 
-  //this context store the state of dashboard sidenavbar button click
+  //this context store the state of dashboard side navbar button click
   //using this we can get the state of button click globally
   const dashboardSideNavButtonClickContext = createContext({});
 
@@ -562,14 +562,14 @@ function DashboardLayout({
   }: {
     children: React.ReactNode
   }) {
-    //This component has a state variable called "dasboardType", which is initially set to an empty string.
-    //defined a function called setDasboardType that can be used to update the value of dasboardType.
-    const [dasboardType, setDasboardType] = useState('Dashboard');
+    //This component has a state variable called "dashboardType", which is initially set to an empty string.
+    //defined a function called setDashboardType that can be used to update the value of dashboardType.
+    const [dashboardType, setDashboardType] = useState('Dashboard');
     const [isDashboardBtnClicked, setIsDashboardBtnClicked] = useState(false);
     
     return (
       //we can pass as many value as we need
-      <dashboardTypeContext.Provider value={{dasboardType, setDasboardType, isDashboardBtnClicked, setIsDashboardBtnClicked}} >
+      <dashboardTypeContext.Provider value={{dashboardType, setDashboardType, isDashboardBtnClicked, setIsDashboardBtnClicked}} >
         <main className='w-full h-full flex flex-row'>
             {/* Include shared UI here e.g. a header or sidebar */}
             <DashboardSidebar/>
@@ -603,12 +603,12 @@ function DashboardLayout({
 ```tsx
 function DashboardSidebar() {
     //consume context
-    const { setDasboardType } = useContext(dashboardTypeContext) as any; 
+    const { setDashboardType } = useContext(dashboardTypeContext) as any; 
     const { isDashboardBtnClicked ,setIsDashboardBtnClicked } = useContext(dashboardTypeContext) as any;
   return(
     <aside className={`${isDashboardBtnClicked ? 'flex xl:hidden lg:hidden md:hidden sm:flex xs:flex fixed top-0 left-0 z-10 transform transition-transform duration-300 ease-in-out w-[216px]' : 'flex xl:flex lg:flex md:flex sm:hidden xs:hidden'}`}>
     {/*main content*/}
-      <button onClick={()=> { setDasboardType('Dashboard'); setIsDashboardBtnClicked(false)}} className='hover:shadow-[1px_1px_0px_1.5px_rgba(250,_140,_40,_1.5)]'>
+      <button onClick={()=> { setDashboardType('Dashboard'); setIsDashboardBtnClicked(false)}} className='hover:shadow-[1px_1px_0px_1.5px_rgba(250,_140,_40,_1.5)]'>
         <Link href='/auth/dashboard' className='h-[60px] pl-[55px] mt-[12px] flex items-center'>
             Dashboard
         </Link>
@@ -617,99 +617,6 @@ function DashboardSidebar() {
   )
 }
 ```
-
-### Simple Modal container
--  Create a Calendar with Modal and closes on clicking on screen outside the container
-- run command: npm i react-calendar
-```tsx
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-
-const DashboardNavbar = (props: Props) => {
-    const [isCalendarBtnClicked, setIsCalendarBtnClicked] = useState(false);
-
-    const calendarBtnClickFunc = ()=>{
-        setIsCalendarBtnClicked(!isCalendarBtnClicked);
-    }
-   
-      return(
-        <section>
-        {
-            isCalendarBtnClicked ? 
-            (
-                <section className='fixed w-fit inset-0 z-10'>
-                    <section className='fixed top-[40px] transform translate-x-1/2 translate-y-1/2 flex bg-white shadow-lg rounded-2xl'>
-                        <Calendar />
-                    </section>
-                </section>
-            ) :
-            (
-                <section>
-                </section>
-            )
-        }
-        </section>
-      )
-
-}
-```
-
-### Protect Route
-- To protect a route in Next.js the general logic is:
-  1. Check if a user is authenticated
-  2. If they are authenticated, fetch data and render the page
-  3. If they are not authenticated, redirect the user to the login page or return an "unauthorized" response
-- Create a route(server - api/auth/is-authenticated) which checks the user is authenticated or not using cookies/token.
-- Create a protectRoute component at client:
-```tsx
-  'use client'
-  import { useRouter } from 'next/navigation';
-  import React, { useEffect } from 'react';
-
-  const IsAuthenticated = (Component: any) => {
-    const WrappedComponent = (props: any) => {
-      const router = useRouter();
-
-      const checkAuthentication = async () => {
-        const response = await fetch('http://localhost:3000/api/auth/is-authenticated', {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
-
-        const isAuth = response.ok;
-        return isAuth;
-      };
-
-      useEffect(() => {
-        const fetchData = async () => {
-          const isAuth = await checkAuthentication();
-          if (!isAuth) {
-            router.push('/login');
-          }
-        };
-
-        fetchData();
-      }, []);
-
-      if (!Component) {
-        return null;
-      } else {
-        return <Component {...props} />;
-      }
-    };
-
-    return WrappedComponent;
-  };
-
-  export default IsAuthenticated;
-```
-- use this component as a higher order component to protect page during export:
-  ```tsx
-  export default IsAuthenticated(page)
-  ```
-
 
 ### Creating a slider(carousel) for testimonial cards:
 1. We can easily create a sliding cards with autoplay using swiper, visit: https://swiperjs.com/ to know more about this.
