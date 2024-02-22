@@ -1,5 +1,5 @@
-### 1. Classname Convention:
-* It is important to give different classname for styling for each and every file to work perfectly.
+### 1. ClassName Convention:
+* It is important to give different className for styling for each and every file to work perfectly.
 
 ### Vertical text
 ```tsx
@@ -117,6 +117,9 @@ or
   }
 ```
 * To understand better go to PasswordPage.jsx file and see useEffect hook and .main-container.
+
+### Flickering issue:
+- It's mainly due to height so give give height to static component (not getting from server).
 
 ### justify-content not working:
 * position is set to absolute, remove position and instead use padding or margin.
